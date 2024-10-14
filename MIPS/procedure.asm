@@ -7,21 +7,23 @@
 .text
 .globl main
 main:
+
+  # Load arguments
   la $gp, g        # Load address of g into $gp
-  lw $a0, 0($gp)   # Load g into $s1
+  lw $a0, 0($gp)   # Load g into $a0
   la $gp, h        # Load address of h into $gp
-  lw $a1, 0($gp)   # Load h into $s2
+  lw $a1, 0($gp)   # Load h into $a1
   la $gp, i        # Load address of i into $gp
-  lw $a2, 0($gp)   # Load i into $s3
+  lw $a2, 0($gp)   # Load i into $a2
   la $gp, j        # Load address of j into $gp
-  lw $a3, 0($gp)   # Load j into $s4
+  lw $a3, 0($gp)   # Load j into $a3
 
   jal leaf_example  # Jump-and-Link to procedure
   j Exit
 
 leaf_example:
   # Save old values on stack before executing procedure
-  addi $sp, $sp, -12  # adjust stack to make room for 3 items
+  addi $sp, $sp, -12  # adjust stack to make room for 3 items, 4 bytes each, growing downwards
   sw $t1, 8($sp)      # save register 
   sw $t0, 4($sp)      # save register 
   sw $s0, 0($sp)      # save register 
