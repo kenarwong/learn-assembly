@@ -56,16 +56,16 @@ main:
   j Exit
 
 divide:
-  add $t0, $zero, $a0         # Dividend
+  add $t0, $zero, $a0         # dividend
 
-  add $t1, $zero, $a1         # Divisor
+  add $t1, $zero, $a1         # divisor
   xori $t1, $t1, -1           
-  addi $t1, $t1, 1            # 2's complement of Divisor
+  addi $t1, $t1, 1            # 2's complement of divisor
   sll $t1, $t1, 0x10
 
   addi $t2, $zero, 16         # n (16 bit)
 
-  add $t3, $zero, $a0         # Initialize AQ
+  add $t3, $zero, $a0         # initialize AQ
 
   addi $t4, $zero, 0xffff     # A mask
   lui $t5, 0xffff             # Q mask
@@ -86,7 +86,7 @@ divideloop:
   bne $t7, 0x80000000, divideloop   # no overflow if no change in last bit 
 
   # if overflow
-  ori $t3, $t3, 1                   # if overflow, set Q0
+  ori $t3, $t3, 1                   # if overflow detected, set Q0 = 1
 
   # add remainder to A
   and $t8, $t3, $t4                 # mask A from AQ (keep Q)
