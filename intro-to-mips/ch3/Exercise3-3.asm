@@ -1,4 +1,4 @@
-# File:     Exercise3-2.asm
+# File:     Exercise3-3.asm
 # Author:   Ken Hwang
 # Purpose:  Implement NOT with XOR (2's complement)
 

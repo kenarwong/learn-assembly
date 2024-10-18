@@ -1,6 +1,6 @@
-# File: Exercise3-4.asm
-# Author: Ken Hwang
-# Purpose: Demonstrate universality of NAND and NOR
+# File:     Exercise3-4.asm
+# Author:   Ken Hwang
+# Purpose:  Demonstrate universality of NAND and NOR
 
 .text
 .globl main

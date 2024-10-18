@@ -1,4 +1,4 @@
-# File:     Exercise3-2.asm
+# File:     Exercise3-1.asm
 # Author:   Ken Hwang
 # Purpose:  Execute real instructions versus pseudocodes
 
