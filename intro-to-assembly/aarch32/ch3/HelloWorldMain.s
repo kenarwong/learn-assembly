@@ -1,5 +1,11 @@
-.text
+#
+# Program name: helloWorldMain.s
+# Author: Charles Kann
+# Date:9/19/2020
+# Purpose: This program shows how to print a string using the C function printf
+#
 
+.text
 .global main
 
 main:
