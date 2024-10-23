@@ -135,7 +135,7 @@ RightCircularShift:
 # side effects:   None
 .text
 LeftCircularShift:
-  andi $v1, $a0, 0x8000
+  andi $v1, $a0, 0x80000000
   rol $v0, $a0, 1
 
   jr $ra

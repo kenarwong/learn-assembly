@@ -40,7 +40,6 @@ PrintNewLine:
 # purpose:        To print a string to the console
 # input:          $a0 - The address of the string to print.
 #                 $a1 - The value of the int to print
-# returns:        None
 # side effects:   The String is printed followed by the integer value.
 .text
 PrintInt:
