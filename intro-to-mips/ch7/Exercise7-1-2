@@ -1,0 +1,5 @@
+# 1a) Instructions will never be byte addressed, so the lower 2 bits can be ignored. Also allows for large address range.
+# 1b) If referring to second-pass of assembler, there is no symbol table or external reference. Branch instructions are convenient because of PC-relative addressing and do not need additional calculations.
+# 1c) Yes, jump addresses use pseudodirect addressing. 26 bits in J-format instruction actually reference 28 bit byte address. Allows for larger address range
+
+# 2) Branches are calculated from PC + 4 bytes (1 word), so the 1 is added to the range.
