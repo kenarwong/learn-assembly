@@ -1,0 +1,3 @@
+# The assembler does not need to worry about unresolved references with PC-relative addressing.
+# If program code moves around in memory or if the branch statement is moved around in .text, 
+# the address will always be relative to PC.
