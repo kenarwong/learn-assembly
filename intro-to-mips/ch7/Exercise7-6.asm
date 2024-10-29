@@ -1,6 +1,8 @@
 # File:     Exercise7-5.asm
 # Author:   Ken Hwang
-# Purpose:  Random number guessing game
+# Purpose:  Random number guessing game (computer's turn)
+#
+# The number of guesses is log(n)
 
 .text
 .globl main
