@@ -1,0 +1,2 @@
+# Without some sort of comparison, I don't believe this is possible.
+# With comparisons, then you wouldn't need sll or srl. (LSB = 1 is odd, 0 = even)

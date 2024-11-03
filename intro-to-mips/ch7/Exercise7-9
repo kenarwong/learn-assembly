@@ -2,5 +2,7 @@
 # This value is word-addressed (0x01 = 1 word, not 1 byte)
 # It is also a signed 16-bit integer
 
-# The max distance as an address distance is 0x7fff
-# The max distance in number of statements is 2^(16-1) + 1  [Add 1 for PC auto-increment]
+# The max distance as an address distance is +/- 2^17 bytes.
+# The max distance in number of statements is +/- 2^15 instructions.
+
+# Need clarification on this answer
