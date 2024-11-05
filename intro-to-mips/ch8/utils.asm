@@ -43,6 +43,10 @@ PrintNewLine:
 # side effects:   The String is printed followed by the integer value.
 .text
 PrintInt:
+  addi $sp, $sp, -8
+  sw $a0, 4($sp)
+  sw $ra, 0($sp)
+
   # Print string. The string address is already in $a0
   li $v0, 4
   syscall
@@ -52,6 +56,12 @@ PrintInt:
   move $a0, $a1
   li $v0, 1
   syscall
+
+  jal PrintNewLine
+
+  lw $a0, 4($sp)
+  lw $ra, 0($sp)
+  addi $sp, $sp, 8
 
   #return
   jr $ra

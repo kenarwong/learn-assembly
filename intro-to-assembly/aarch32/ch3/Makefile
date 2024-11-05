@@ -43,31 +43,34 @@ run-$(EXECUTABLE3): clean $(EXECUTABLE3)
 	qemu-arm-static -g 10101 ./$(BIN)/$(EXECUTABLE3)
  
 debug-$(EXECUTABLE1):
-	gdb-multiarch -q --nh \
+	# gdb-multiarch -q --nh \
+	gdb-multiarch -q \
 	-ex 'set architecture arm' \
 	-ex 'file ./$(BIN)/$(EXECUTABLE1)' \
 	-ex 'target remote localhost:10101' \
 	-ex 'break main' \
 	-ex continue \
-	-ex 'layout split'
+	# -ex 'layout split'
 
 debug-$(EXECUTABLE2):
-	gdb-multiarch -q --nh \
+	# gdb-multiarch -q --nh \
+	gdb-multiarch -q \
 	-ex 'set architecture arm' \
 	-ex 'file ./$(BIN)/$(EXECUTABLE2)' \
 	-ex 'target remote localhost:10101' \
 	-ex 'break main' \
 	-ex continue \
-	-ex 'layout split'
+	# -ex 'layout split'
 
 debug-$(EXECUTABLE3):
-	gdb-multiarch -q --nh \
+	# gdb-multiarch -q --nh \
+	gdb-multiarch -q \
 	-ex 'set architecture arm' \
 	-ex 'file ./$(BIN)/$(EXECUTABLE3)' \
 	-ex 'target remote localhost:10101' \
 	-ex 'break main' \
 	-ex continue \
-	-ex 'layout split'
+	# -ex 'layout split'
 
 clean:
 	rm ./$(BIN)/*
