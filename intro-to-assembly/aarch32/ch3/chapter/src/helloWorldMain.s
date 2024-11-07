@@ -21,6 +21,7 @@ main:
   # Return to the OS
   LDR lr, [sp, #0]
   ADD sp, sp, #4
+  # BX lr
   # MOV pc, lr                // Error code 12 (014 octal)
 
   MOV r7, #1                  // syscall exit code

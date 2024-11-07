@@ -37,7 +37,7 @@ main:
 
   MOV r7, #1                  // syscall exit code
   MOV r0, #0                  // no error
-  SWI 0                       // exit
+  SVC 0                       // exit
 
 .data
   # Prompt the user to enter their name

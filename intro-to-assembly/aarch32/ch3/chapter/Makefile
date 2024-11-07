@@ -1,6 +1,8 @@
 TOOLCHAIN 									:= arm-linux-gnueabihf
-TOOLCHAIN_FLAGS 						:= -gstabs
+TOOLCHAIN_FLAGS 						:= --gstabs -march=armv7-a
 LINK_FLAGS 									:= -static
+DEBUG_ARCH                  := armv7
+DEBUG_PORT                  := 10101
 
 BIN 												:= bin
 SRC 												:= src
@@ -32,45 +34,39 @@ $(BIN)/$(EXECUTABLE3): $(SRC)/$(EXECUTABLE3)Main.s
 
 run-$(EXECUTABLE1): clean $(EXECUTABLE1)
 	clear
-	qemu-arm-static -g 10101 ./$(BIN)/$(EXECUTABLE1)
+	qemu-arm-static -g $(DEBUG_PORT) ./$(BIN)/$(EXECUTABLE1)
 
 run-$(EXECUTABLE2): clean $(EXECUTABLE2)
 	clear
-	qemu-arm-static -g 10101 ./$(BIN)/$(EXECUTABLE2)
+	qemu-arm-static -g $(DEBUG_PORT) ./$(BIN)/$(EXECUTABLE2)
 
 run-$(EXECUTABLE3): clean $(EXECUTABLE3)
 	clear
-	qemu-arm-static -g 10101 ./$(BIN)/$(EXECUTABLE3)
+	qemu-arm-static -g $(DEBUG_PORT) ./$(BIN)/$(EXECUTABLE3)
  
 debug-$(EXECUTABLE1):
-	# gdb-multiarch -q --nh \
 	gdb-multiarch -q \
-	-ex 'set architecture arm' \
+	-ex 'set architecture $(DEBUG_ARCH)' \
 	-ex 'file ./$(BIN)/$(EXECUTABLE1)' \
-	-ex 'target remote localhost:10101' \
+	-ex 'target remote localhost:$(DEBUG_PORT)' \
 	-ex 'break main' \
 	-ex continue \
-	# -ex 'layout split'
 
 debug-$(EXECUTABLE2):
-	# gdb-multiarch -q --nh \
 	gdb-multiarch -q \
-	-ex 'set architecture arm' \
+	-ex 'set architecture $(DEBUG_ARCH)' \
 	-ex 'file ./$(BIN)/$(EXECUTABLE2)' \
-	-ex 'target remote localhost:10101' \
+	-ex 'target remote localhost:$(DEBUG_PORT)' \
 	-ex 'break main' \
 	-ex continue \
-	# -ex 'layout split'
 
 debug-$(EXECUTABLE3):
-	# gdb-multiarch -q --nh \
 	gdb-multiarch -q \
-	-ex 'set architecture arm' \
+	-ex 'set architecture $(DEBUG_ARCH)' \
 	-ex 'file ./$(BIN)/$(EXECUTABLE3)' \
-	-ex 'target remote localhost:10101' \
+	-ex 'target remote localhost:$(DEBUG_PORT)' \
 	-ex 'break main' \
 	-ex continue \
-	# -ex 'layout split'
 
 clean:
 	rm ./$(BIN)/*
