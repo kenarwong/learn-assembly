@@ -2,6 +2,10 @@
 # Author:   Ken Hwang
 # Purpose:  Quick Sort
 
+.data
+  prompt:           .asciiz "Enter a max size of array: "
+  maxRange:         .word   65536
+
 .text
 .globl main
 
@@ -61,10 +65,6 @@ main:
   jal PrintIntArray
 
   jal Exit
-
-.data
-  prompt:           .asciiz "Enter a max size of array: "
-  maxRange:         .word   255
 
 .text
 # Subprogram:                 QuickSort
@@ -314,6 +314,9 @@ partition:
         # swap(arr[i],arr[j])
         sw $t7, 0($t4)                    
         sw $t5, 0($t6)                    
+
+        addi $t0, $t0, 1                          # i++
+        addi $t3, $t3, -1                         # j--
 
         b partitionLoop
     
