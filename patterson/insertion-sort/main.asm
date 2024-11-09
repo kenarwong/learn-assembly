@@ -1,12 +1,12 @@
-#void sort(int v[], int n)
-#{
-#  int i, j;
-#  for (i = 0; i < n; i += 1) {
-#    for (j = i - 1; j >= 0 && v[j] > v[j + 1]; j -= 1) {
-#      swap(v,j);
-#    }
-#  }
-#}
+# void sort(int v[], int n)
+# {
+#   int i, j;
+#   for (i = 0; i < n; i += 1) {
+#     for (j = i - 1; j >= 0 && v[j] > v[j + 1]; j -= 1) {
+#       swap(v,j);
+#     }
+#   }
+# }
 
 .data
   v:   .word 8, 3, 7, 1, 5
