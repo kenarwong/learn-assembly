@@ -1,6 +1,6 @@
 # File:     Exercise9-2.asm
 # Author:   Ken Hwang
-# Purpose:  Convert decimal to hex
+# Purpose:  Convert decimal to hex character representation
 
 .text
 .globl main
