@@ -10,6 +10,7 @@
   size1:                      .word     10
   size2:                      .word     100
   size3:                      .word     1000
+  size4:                      .word     10000
   assertFailedText:           .asciiz   "Assertion failed. Exiting."
   operationsCountText:        .asciiz   "Average number of access operations: "
   loopBinarySearchStartText:  .asciiz   "Looping binary search"
@@ -39,6 +40,11 @@ main:
 
   # size3
   lw $a0, size3                           # size
+  lw $a1, numRuns                         # number of runs
+  jal LoopBinarySearch
+
+  # size4
+  lw $a0, size4                           # size
   lw $a1, numRuns                         # number of runs
   jal LoopBinarySearch
 
@@ -101,10 +107,6 @@ LoopBinarySearch:
 
   li $v0, 1
   move $a0, $s3
-  syscall
-
-  li $v0, 4
-  la $a0, newline
   syscall
 
   li $v0, 4
@@ -194,6 +196,10 @@ LoopBinarySearch:
     syscall
 
     li $v0, 3
+    syscall
+
+    li $v0, 4
+    la $a0, newline
     syscall
 
     li $v0, 4
