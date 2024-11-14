@@ -57,9 +57,9 @@ main:
   syscall
 
   # Swap 
-  xor $t0, $s1, $s0         # parity bit
-  xor $s0, $s0, $t0         # swap s0
-  xor $s1, $s1, $t0         # swap s1
+  xor $s0, $s1, $s0         # parity bit
+  xor $s1, $s1, $s0         # swap s1
+  xor $s0, $s1, $s0         # swap s0
 
   # Display the result
   addi $v0, $zero, 4
