@@ -70,6 +70,8 @@ main:
   add     sp, sp, #8
   bx      lr 
 
+  .section  .note.GNU-stack,"",%progbits
+
 @ Calling sequence:
 @        r0: first number
 @        r1: second number
