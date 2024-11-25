@@ -17,12 +17,17 @@ main:
 
   # scan float
   ldr r0, =input
-  ldr r1, =num
+  # ldr r1, =num                  @ there is an issue when passing parameters by address to scanf 
+                                  @ only occurs with floating point parameters and target armv6
+                                  @ kernel returns SIGBUS signal due to memory alignment issues (https://docs.kernel.org/arch/arm/mem_alignment.html)
+                                  @ https://stackoverflow.com/questions/64287587/memory-alignment-issues-with-gcc-vector-extension-and-arm-neon
+  sub sp, sp, #8                  @ allocate space on stack instead of using static memory
+  mov r1, sp
   bl scanf
 
   # convert
-  ldr r1, =num                    @ r1 is cleared out from scanf
-  ldr r1, [r1, #0]
+  # ldr r1, =num                    
+  ldr r1, [sp, #0]                @ r1 is cleared out from scanf
   vmov s14, r1 
   vcvt.F64.F32 d5, s14
 
@@ -34,7 +39,7 @@ main:
 
   # restore stack
   ldr lr, [sp, #0]
-  add sp, sp, #4
+  add sp, sp, #12
 
   # exit
   mov r7, #1                  
@@ -45,4 +50,4 @@ main:
   prompt: .asciz "Input float: "
   input:  .asciz "%f"
   format: .asciz "%.6f\n"
-  num:    .float 0
+  # num:    .float 0
