@@ -52,7 +52,7 @@ main:
   # e) -260
   ldr     r0, =format
   mvn     r1, #0b01000000
-  lsl     r1, r1, #2              # not a rotate
+  lsl     r1, r1, #2              @ not a rotate
   bl      printf
 
   mov     r0, #0
