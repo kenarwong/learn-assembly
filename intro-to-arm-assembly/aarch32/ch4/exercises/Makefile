@@ -9,9 +9,6 @@ DEBUG_PORT                  := 10101
 BIN 												:= bin
 SRC 												:= src
 
-USERNAME										:= ken
-PI_HOSTNAME									:= pi-zero
-
 EXECUTABLE 									:= problem$(NUMBER)
 
 all: $(BIN)/$(EXECUTABLE)
@@ -32,12 +29,6 @@ debug:
 	-ex 'target remote localhost:$(DEBUG_PORT)' \
 	-ex 'break main' \
 	-ex continue \
-
-pi: $(SRC)/$(EXECUTABLE)/*.s
-	@echo "Assembling file: $(BIN)/$(EXECUTABLE)"
-	$(ASM)-as $^ -o $(BIN)/$(EXECUTABLE).o $(ASM_FLAGS)
-	scp $(BIN)/$(EXECUTABLE).o $(USERNAME)@$(PI_HOSTNAME):~ 
-	# ssh $(USERNAME)@$(PI_HOSTNAME) "$(ASM)-gcc $(EXECUTABLE).o -o $(EXECUTABLE)"
 
 clean:
 	-rm ./$(BIN)/*

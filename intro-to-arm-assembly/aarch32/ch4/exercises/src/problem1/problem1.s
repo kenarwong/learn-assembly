@@ -22,7 +22,6 @@ format:
         .equ    arg2, -12
         .equ    locals, 8
         .text
-        .global __aeabi_idiv
         .align  2
         .global main
         .syntax unified
@@ -54,8 +53,8 @@ main:
   # call mod function
   ldr     r0, [fp, #arg1]
   ldr     r1, [fp, #arg2]
-  bl mod
-  mov r3, r0
+  bl      mod
+  mov     r3, r0
 
   # message
   ldr     r0, =format             

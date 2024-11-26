@@ -11,7 +11,6 @@ format:
  
 @ Program code
         .text
-        .global __aeabi_idiv
         .align  2
         .global main
         .syntax unified

@@ -38,7 +38,7 @@ main:
   add     fp, sp, #4
   sub     sp, sp, #locals
 
-  # first number
+  # convert from Celsius to Fahrenheit or Fahrenheit to Celsius
   ldr     r0, =prompt1
   bl      printf
 
@@ -46,7 +46,7 @@ main:
   add     r1, fp, #arg1
   bl      scanf
 
-  # second number
+  # temperature
   ldr     r0, =prompt2
   bl      printf
 
@@ -57,13 +57,13 @@ main:
   # call convertTemp function
   ldr     r0, [fp, #arg1]
   ldr     r1, [fp, #arg2]
-  bl convertTemp
-  mov r2, r0
+  bl      convertTemp
+  mov     r2, r0
 
   # message
   ldr     r0, [fp, #arg1]
   cmp     r0, #0
-  beq     useCelsiusToFahrenheitFormat
+  bne     useFahrenheitToCelsiusFormat
 
   useCelsiusToFahrenheitFormat:
     ldr     r0, =celsiusToFahrenheitFormat
@@ -95,8 +95,8 @@ main:
 @ Program code
         .text
         .align  2
-        .global mod
-        .type   mod, %function
+        .global convertTemp
+        .type   convertTemp, %function
         .syntax unified
 
 convertTemp:
