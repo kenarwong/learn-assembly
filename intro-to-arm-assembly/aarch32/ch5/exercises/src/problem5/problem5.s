@@ -1,8 +1,8 @@
 
-@ Program name:       problem3.s
+@ Program name:       problem5.s
 @ Author:             Ken Hwang
 @ Date:               11/26/2024
-@ Purpose:            8-bit operand2 values 
+@ Purpose:            Decimal operand2 values 
 
 @ Constant program data
         .section  .rodata
@@ -23,36 +23,33 @@ main:
   str     lr, [sp, #4]
   add     fp, sp, #4
 
-  # a) 198
+  # a) 24
   ldr     r0, =format
-  mov     r1, #0b11000110 
+  mov     r1, #24
   bl      printf
 
-  # b) 260
+  # b) 15
   ldr     r0, =format
-  mov     r1, #0b01000001, 30
+  mov     r1, #15
   bl      printf
 
-  # c) 9216
+  # c) 34
   ldr     r0, =format
-  mov     r1, #0b00100100, 24
+  mov     r1, #34
   bl      printf
 
-  # d) 2162688
+  # d) 27
   ldr     r0, =format
-  mov     r1, #0b00100001, 16
+  mov     r1, #27
   bl      printf
 
-  # e) -75
+  # e) 8
   ldr     r0, =format
-  mvn     r1, #0b01001010
+  mov     r1, #8
   bl      printf
 
-  # e) -260
-  ldr     r0, =format
-  mvn     r1, #0b01000000
-  lsl     r1, r1, #2              @ not a rotate
-  bl      printf
+  # All of the values are valid as operand2 values because they can all be represented by 8-bits (< 255)
+  # They also do not need any rotation
 
   mov     r0, #0
   ldr     fp, [sp, #0]
