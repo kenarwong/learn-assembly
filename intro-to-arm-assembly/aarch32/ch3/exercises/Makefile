@@ -1,7 +1,7 @@
 ASM													:= arm-linux-gnueabihf
 # ASM_FLAGS										:= --gstabs -march=armv7-a+vfpv3-fp16
 ASM_FLAGS										:= --gstabs -march=armv6+fp
-# LINK_FLAGS 									:= -static
+LINK_FLAGS 									:= -static
 # DEBUG_ARCH                  := armv7
 DEBUG_ARCH                  := armv6
 DEBUG_PORT                  := 10101

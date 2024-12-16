@@ -1,7 +1,7 @@
 @ Program name:       problem1.s
 @ Author:             Ken Hwang
 @ Date:               12/16/2024
-@ Purpose:             
+@ Purpose:            Test library functions k2m, mph, and k2mph 
 
 @ Constant program data
         .section  .rodata
@@ -135,7 +135,7 @@ main:
   mul r0, r0, r1
 
   # call k2mph
-  ldr r1, [fp, response3]
+  ldr r1, [fp, response5]
   bl k2mph                   @ result in r0
 
   # print (scale down by 1000)
