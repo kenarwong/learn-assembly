@@ -20,7 +20,7 @@
         .global k2m
         .global __aeabi_idiv
         .syntax unified
-        .type   main, %function
+        .type   k2m, %function
 
 k2m:
   sub             sp, sp, #8
@@ -58,7 +58,7 @@ k2m:
         .global mph
         .global __aeabi_idiv
         .syntax unified
-        .type   main, %function
+        .type   mph, %function
 
 mph:
   sub             sp, sp, #8
@@ -93,7 +93,7 @@ mph:
         .align  2
         .global k2mph
         .syntax unified
-        .type   main, %function
+        .type   k2mph, %function
 
 k2mph:
   sub             sp, sp, #8
