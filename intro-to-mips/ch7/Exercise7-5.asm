@@ -78,8 +78,8 @@ exit:
 
 .data
   prompt:                      .asciiz "Enter a maximum value for a random number: "
-  displayGuess:                .asciiz "Guess the number: "
-  displayCorrect:              .asciiz "You guess the number!\n"
+  displayGuess:                .asciiz "Guess a number: "
+  displayCorrect:              .asciiz "You guessed the number!\n"
   displayTooLow:               .asciiz "You guessed too low.\n"
   displayTooHigh:              .asciiz "You guessed too high.\n"
   displayGuessCount:           .asciiz "Number of guesses: "
