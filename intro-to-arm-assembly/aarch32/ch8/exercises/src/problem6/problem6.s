@@ -66,15 +66,15 @@ main:
   mov               r4, r0                                  @ final guess
   mov               r5, r1                                  @ guess count
 
-  ldr             r0, =displayFinalGuess
-  mov             r1, r4
-  bl              printf
+  ldr               r0, =displayFinalGuess
+  mov               r1, r4
+  bl                printf
 
-  ldr             r0, =displayGuessCount
-  mov             r1, r5
-  bl              printf
+  ldr               r0, =displayGuessCount
+  mov               r1, r5
+  bl                printf
 
-  b               exit
+  b                 exit
 
   invalidInput:
     # print error

@@ -148,8 +148,8 @@ displayReport:
 
       # determine plurality
       calculateLabelPlurality:
-        beq $t3, 1, displayQuantityLabel
-        add $a0, $a0, $t4                       # increment by ASCII label size for next plural label
+        beq $t3, 1, displayQuantityLabel        # if quantity == 1, skip
+        add $a0, $a0, $t4                       # increment by ASCII label size for a plural label
       
       displayQuantityLabel:
         li $v0, 4
