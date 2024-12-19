@@ -91,7 +91,7 @@ swap:
   str             lr, [sp, #4]
   add             fp, sp, #4
 
-  # swap with temp
+  # swap without temp
   eor            r0, r0, r1
   eor            r1, r1, r0
   eor            r0, r0, r1
