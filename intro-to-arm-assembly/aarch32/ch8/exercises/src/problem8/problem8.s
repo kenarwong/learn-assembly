@@ -74,11 +74,11 @@ main:
 
   # initialize
   ldr               r5, [r0, firstPrime]                  @ i (divisor)
-  mov               r6, #0                                @ array index
 
   lsr               r0, r4, 1                             @ size = n/2
   bl                malloc
-  mov               r7, r0                                @ int array[size]
+  mov               r6, r0                                @ int array[size]
+  mov               r7, r6                                @ array index
 
   mov               r8, #0                                @ prime occurrences
 
@@ -107,8 +107,7 @@ main:
       bne           continuePrimeOccurrencesLoop          @ n % i != 0, no longer divisible, get next divisor
 
       mov           r4, r0                                @ quotient becomes new dividend
-      str           r5, [r7, r6]                          @ array[index] = prime factor
-      add           r6, r6, #4                            @ array index++
+      str           r5, [r7], #4                          @ array[index] = prime factor
       add           r8, r8, #1                            @ occurrences++
 
       b             whileDivisibleLoop          
@@ -120,7 +119,7 @@ main:
   displayPrimes:
     # initialize
     mov             r4, #0                                @ i
-    mov             r5, #0                                @ array index
+    mov             r5, r6                                @ array index
     mov             r6, #0                                @ last prime factor (to check for uniqueness)
 
     displayPrimesLoop:
@@ -128,7 +127,7 @@ main:
       beq           exit                                  @ i == occurences, exit
 
       @ mov           r0, r6
-      ldr           r6, [r7, r5]                          @ prime factor = array[index]
+      ldr             r6, [r5], #4                        @ prime factor = array[index]
       @ cmp           r6, r0
       @ beq           continueDisplayPrimesLoop             @ if prime factor is same as last, skip
                                                           @ comment line to remove uniqueness skip
@@ -149,7 +148,6 @@ main:
 
       continueDisplayPrimesLoop:
         add           r4, r4, #1                            @ i++
-        add           r5, r5, #4                            @ array index++
         b displayPrimesLoop
 
   invalidInput:

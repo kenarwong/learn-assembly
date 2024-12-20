@@ -17,6 +17,7 @@ IF_ELSE_IF_ELSE_EXAMPLE			:= ifElseIfElse
 SENTINAL_LOOP_EXAMPLE				:= sentinelLoop
 COUNTER_LOOP_EXAMPLE				:= counterLoop
 NESTED_LOOP_EXAMPLE					:= nestedLoop
+PRINTF_ARGS_EXAMPLE					:= printfArgs
 
 all: $(BIN)/$(IF_EXAMPLE) $(BIN)/$(SPAGHETTI_EXAMPLE) $(BIN)/$(LOGICAL_VAR_EXAMPLE) $(BIN)/$(IF_ELSE_EXAMPLE) $(BIN)/$(IF_ELSE_IF_ELSE_EXAMPLE) $(BIN)/$(SENTINAL_LOOP_EXAMPLE) $(BIN)/$(COUNTER_LOOP_EXAMPLE) $(BIN)/$(NESTED_LOOP_EXAMPLE)
 
@@ -60,6 +61,11 @@ $(BIN)/$(NESTED_LOOP_EXAMPLE): $(SRC)/$(NESTED_LOOP_EXAMPLE).s
 	$(ASM)-as $^ -o $(BIN)/$(NESTED_LOOP_EXAMPLE).o $(ASM_FLAGS)
 	$(ASM)-gcc $(BIN)/$(NESTED_LOOP_EXAMPLE).o -o $@ $(LINK_FLAGS)
 
+$(BIN)/$(PRINTF_ARGS_EXAMPLE): $(SRC)/$(PRINTF_ARGS_EXAMPLE).s
+	@echo "Making file: $(BIN)/$(PRINTF_ARGS_EXAMPLE)"
+	$(ASM)-as $^ -o $(BIN)/$(PRINTF_ARGS_EXAMPLE).o $(ASM_FLAGS)
+	$(ASM)-gcc $(BIN)/$(PRINTF_ARGS_EXAMPLE).o -o $@ $(LINK_FLAGS)
+
 run-if: clean $(BIN)/$(IF_EXAMPLE)
 	clear
 	qemu-arm-static -g $(DEBUG_PORT) ./$(BIN)/$(IF_EXAMPLE)
@@ -92,6 +98,10 @@ run-nested-loop: clean $(BIN)/$(NESTED_LOOP_EXAMPLE)
 	clear
 	qemu-arm-static -g $(DEBUG_PORT) ./$(BIN)/$(NESTED_LOOP_EXAMPLE)
 
+run-printf: clean $(BIN)/$(PRINTF_ARGS_EXAMPLE)
+	clear
+	qemu-arm-static -g $(DEBUG_PORT) ./$(BIN)/$(PRINTF_ARGS_EXAMPLE)
+
 disassemble: all
 	$(ASM)-objdump $(BIN)/$(IF_EXAMPLE).o -d
 	$(ASM)-objdump $(BIN)/$(SPAGHETTI_EXAMPLE).o -d
@@ -101,6 +111,7 @@ disassemble: all
 	$(ASM)-objdump $(BIN)/$(SENTINAL_LOOP_EXAMPLE).o -d
 	$(ASM)-objdump $(BIN)/$(COUNTER_LOOP_EXAMPLE).o -d
 	$(ASM)-objdump $(BIN)/$(NESTED_LOOP_EXAMPLE).o -d
+	$(ASM)-objdump $(BIN)/$(PRINTF_ARGS_EXAMPLE).o -d
  
 debug-if:
 	gdb-multiarch -q \
@@ -162,6 +173,14 @@ debug-nested-loop:
 	gdb-multiarch -q \
 	-ex 'set architecture $(DEBUG_ARCH)' \
 	-ex 'file ./$(BIN)/$(NESTED_LOOP_EXAMPLE)' \
+	-ex 'target remote localhost:$(DEBUG_PORT)' \
+	-ex 'break main' \
+	-ex continue \
+ 
+debug-printf:
+	gdb-multiarch -q \
+	-ex 'set architecture $(DEBUG_ARCH)' \
+	-ex 'file ./$(BIN)/$(PRINTF_ARGS_EXAMPLE)' \
 	-ex 'target remote localhost:$(DEBUG_PORT)' \
 	-ex 'break main' \
 	-ex continue \
