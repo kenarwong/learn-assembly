@@ -220,7 +220,7 @@ main:
     bl              getCoinStructFields
     mov             r6, r1
 
-    add             sp, sp, #4                            @ (temporarily) deallocate field space (1 byte) on stack
+    add             sp, sp, #4                            @ (temporarily) deallocate field space (1 word) on stack
 
     # determine print format
     cmp             r8, #1
@@ -238,7 +238,7 @@ main:
     mov             r3, r6
     bl              printf
 
-    sub             sp, sp, #4                            @ reallocate field space (1 byte) on stack to align with stack restoration
+    sub             sp, sp, #4                            @ reallocate field space (1 word) on stack to align with stack restoration
 
   deallocateMemory:
     # free heap
