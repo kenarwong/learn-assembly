@@ -1,0 +1,1 @@
+Yes, it can be applied to programs. Erroneous means an inadvertent implementation that ultimately produces unintended consequences, of which requires remediation.

@@ -1,0 +1,1 @@
+It is possible that an incorrect program happens to produce the same result as a correct program.
