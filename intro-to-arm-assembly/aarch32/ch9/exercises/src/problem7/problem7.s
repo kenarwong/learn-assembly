@@ -109,7 +109,7 @@ factorialRecurse:
 
   # base case     
   cmp             r4, #1          
-  movle           r6, #0                  @ initialize overflow (0)
+  movle           r6, #0                  @ initialize no overflow (0)
   ble             return                  @ value <= 1, return 
 
   # recurse
@@ -122,7 +122,7 @@ factorialRecurse:
   # add
   umull           r5, r0, r5, r4          @ product * value
   cmp             r0, #0          
-  movne           r6, #1                  @ upper byte != 0, overflow 
+  movne           r6, #1                  @ upper byte != 0, overflow detected (1) 
 
   return:
     mov             r0, r5                @ return product

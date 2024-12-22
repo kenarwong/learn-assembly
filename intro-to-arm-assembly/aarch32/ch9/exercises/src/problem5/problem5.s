@@ -12,6 +12,8 @@ input:
   .asciz "%d"
 output:
   .asciz "%d^2 = %d\n"
+overflowOutput:
+  .asciz "Overflow!\n"
 
 @ Program code
         .equ    value,        -8
@@ -48,12 +50,21 @@ main:
   mov             r1, r0                      @ initialize count (n)
   mov             r2, #0                      @ initialize sum (0)
   bl              squareRecurse
+  cmp             r1, #1                      @ check overflow
+  beq             overflowDetected
 
   # display output
   mov             r2, r0
   ldr             r0, =output
   ldr             r1, [fp, value]
   bl              printf
+  
+  b               exit
+
+  # display overflow
+  overflowDetected:
+    ldr             r0, =overflowOutput
+    bl              printf
 
   exit:
     add             sp, sp, #locals
@@ -73,12 +84,14 @@ main:
 @                     r1 - count
 @                     r2 - sum
 @ Output:             r0 - sum
+@                     r1 - overflow
 
 @ Program code
         .equ    value,        -8
         .equ    count,        -12
         .equ    sum,          -16
-        .equ    locals,       12
+        .equ    overflow,     -20
+        .equ    locals,       16
         .text
         .align  2
         .type   squareRecurse, %function
@@ -92,28 +105,35 @@ squareRecurse:
   str             r4, [fp, value]
   str             r5, [fp, count]
   str             r6, [fp, sum]
+  str             r7, [fp, overflow]
 
   # initialize
-  mov             r4, r0          @ value
-  mov             r5, r1          @ count
-  mov             r6, r2          @ sum
+  mov             r4, r0                  @ value
+  mov             r5, r1                  @ count
+  mov             r6, r2                  @ sum
 
   # base case     
   cmp             r5, #0          
-  beq             return          @ count == 0, return 
+  moveq           r7, #0                  @ initialize no overflow (0)
+  beq             return                  @ count == 0, return 
 
   # recurse
-  mov             r0, r4          @ value
-  sub             r1, r5, #1      @ count--
-  mov             r2, r6          @ sum
+  mov             r0, r4                  @ value
+  sub             r1, r5, #1              @ count--
+  mov             r2, r6                  @ sum
   bl              squareRecurse
+  mov             r6, r0          
+  mov             r7, r1          
 
   # add
-  add             r6, r0, r4      @ sum + value
+  adds            r6, r6, r4              @ sum + value
+  movvs           r7, #1                  @ overflow detected (1)
 
   return:
-    mov             r0, r6          @ return sum
+    mov             r0, r6                @ return sum
+    mov             r1, r7                @ return overflow
 
+    ldr             r7, [fp, overflow]
     ldr             r6, [fp, sum]
     ldr             r5, [fp, count]
     ldr             r4, [fp, value]
