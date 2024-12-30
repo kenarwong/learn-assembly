@@ -68,9 +68,9 @@ main:
     beq             populateHexStringEndLoop                @ i == 16, end loop
 
     mov             r0, 0x30                                @ ASCII "0"
-    strb            r0, [r2], #1                            @ base addr + 1 bytes
+    strb            r0, [r2], #1                            @ base addr + 1 byte
     mov             r0, 0x78                                @ ASCII "x"
-    strb            r0, [r2], #1                            @ base addr + 1 bytes
+    strb            r0, [r2], #1                            @ base addr + 1 byte
 
     cmp             r1, #10                                 
     bge             calculateASCIIatof                      @ if i >= 10
@@ -89,7 +89,7 @@ main:
       mov           r0, #0                                  @ ASCII null 
       strb          r0, [r2], #1                            @ base addr + 1 byte
 
-      add           r1, r1, #1                              @ i+
+      add           r1, r1, #1                              @ i++
       b             populateHexStringLoop         
 
   populateHexStringEndLoop:

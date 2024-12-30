@@ -17,10 +17,10 @@ Random:
     LDR r0, [r0, #0]
   Reset:
   
-  ADD r0, r0, #137 @ get the next seed
+  ADD r0, r0, #137  @ get the next seed
   EOR r0, r0, r0, ror #13
-  LSR r0, r0, #1 @ make sure it is positive
-  MOV r4, r0 @ save the value to r4
+  LSR r0, r0, #1    @ make sure it is positive
+  MOV r4, r0        @ save the value to r4
 
   # Get the remainder
   MOV r3, #0

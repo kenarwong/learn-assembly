@@ -1,23 +1,32 @@
 @ Program name:       problem3.s
 @ Author:             Ken Hwang
 @ Date:               12/30/2024
-@ Purpose:            Convert decimal to hex
+@ Purpose:            Create an array of random values, perform operations on array
 
 @ Constant program data
         .section  .rodata
         .align  2
 prompt:
-  .asciz "Enter a number from 0 to 15: "
+  .asciz "Enter a max limit: "
 input:
-  .asciz "%d"
-output:
-  .asciz "your number is 0x%x\n"
+  .asciz "%u"
+minMaxOutput:
+  .asciz "The minimum value is %d and the maximum value is %d.\n"
+sumAvgOutput:
+  .asciz "The sum is %d and the average is %d.\n"
 error:
   .asciz "You entered invalid input.\n"
+arrayLength:
+  .word 100
 
 @ Program code
         .equ    value,  -8
-        .equ    locals,  8
+        .equ    temp1,  -12
+        .equ    temp2,  -16
+        .equ    temp3,  -20
+        .equ    temp4,  -24
+        .equ    temp5,  -28
+        .equ    locals,  24
         .text
         .align  2
         .global main
@@ -30,6 +39,11 @@ main:
   str               lr, [sp, #4]
   add               fp, sp, #4
   sub               sp, sp, #locals
+  str               r4, [fp, #temp1]
+  str               r5, [fp, #temp2]
+  str               r6, [fp, #temp3]
+  str               r7, [fp, #temp4]
+  str               r8, [fp, #temp5]
 
   # initial prompt   
   ldr               r0, =prompt
@@ -37,23 +51,73 @@ main:
   ldr               r0, =input
   add               r1, fp, value
   bl                scanf
-  ldr               r2, [fp, value]                         @ user value
+  ldr               r4, [fp, value]                         @ r4 = user value
 
   # validate input
   mov               r1, 0x0
-  cmp               r2, r1
-  blt               invalidInput                            @ lt 0, failed validation
+  cmp               r4, r1
+  ble               invalidInput                            @ le 0 | gt INT_MAX, failed validation
 
-  mov               r1, 0x10
-  cmp               r2, r1
-  bge               invalidInput                            @ ge 16, failed validation
+  # allocate memory
+  ldr               r5, =arrayLength                          
+  ldr               r5, [r5, #0]                            @ r5 = array length
+  lsl               r0, r5, #2                              @ length * 4 bytes 
+  bl                malloc 
+  mov               r6, r0                                  @ r6 = base addr
 
-  # convert to hex
-  ldr               r0, =output
-  mov               r1, r2
-  bl                printf
+  # populate array
+  mov               r0, #0                                  @ seed
+  mov               r8, r6                                  @ r7 = current address
+  movs              r7, r5                                  @ r7 = i (array length)
 
-  b                 exit
+  populateArrayLoop:
+    beq             populateArrayEndLoop                    @ i == 0, end loop             
+
+    # get random number
+    mov             r1, r4                                  @ range
+    bl              Random
+
+    # store number
+    str             r0, [r8], #4                            @ base addr + 4 bytes
+
+    subs            r7, r7, #1                              @ i--
+    b               populateArrayLoop
+
+  populateArrayEndLoop:
+
+  # print array
+  mov               r0, r6
+  mov               r1, r5
+  bl                printIntArray
+
+  # get min max
+  mov               r0, r6
+  mov               r1, r5
+  bl                getMinMax
+  mov               r2, r1
+  mov               r1, r0
+
+  # print min max
+  ldr             r0, =minMaxOutput
+  bl              printf
+
+  # get sum avg
+  mov               r0, r6
+  mov               r1, r5
+  bl                getSumAvg
+  mov               r3, r2                                   
+  mov               r2, r1
+  mov               r1, r0
+
+  # check overflow
+  cmp               r3, #1                                  @ if overflow = 1
+  beq               exit
+
+  # print sum avg
+  ldr             r0, =sumAvgOutput
+  bl              printf
+
+  b               exit
 
   invalidInput:
     # print error
@@ -61,6 +125,11 @@ main:
     bl              printf
   
   exit:
+    ldr             r8, [fp, #temp5]
+    ldr             r7, [fp, #temp4]
+    ldr             r6, [fp, #temp3]
+    ldr             r5, [fp, #temp2]
+    ldr             r4, [fp, #temp1]
     add             sp, sp, #locals
     mov             r0, #0
     ldr             fp, [sp, #0]
