@@ -14,6 +14,8 @@ minMaxOutput:
   .asciz "The minimum value is %d and the maximum value is %d.\n"
 sumAvgOutput:
   .asciz "The sum is %d and the average is %d.\n"
+medianOutput:
+  .asciz "The median value is %d.\n"
 error:
   .asciz "You entered invalid input.\n"
 arrayLength:
@@ -84,13 +86,13 @@ main:
     b               populateArrayLoop
 
   populateArrayEndLoop:
-
-  # print array
+  
+  # a) print array
   mov               r0, r6
   mov               r1, r5
   bl                printIntArray
 
-  # get min max
+  # b) get min max
   mov               r0, r6
   mov               r1, r5
   bl                getMinMax
@@ -98,10 +100,10 @@ main:
   mov               r1, r0
 
   # print min max
-  ldr             r0, =minMaxOutput
-  bl              printf
+  ldr               r0, =minMaxOutput
+  bl                printf
 
-  # get sum avg
+  # c) get sum avg
   mov               r0, r6
   mov               r1, r5
   bl                getSumAvg
@@ -114,8 +116,29 @@ main:
   beq               exit
 
   # print sum avg
-  ldr             r0, =sumAvgOutput
-  bl              printf
+  ldr               r0, =sumAvgOutput
+  bl                printf
+
+  # d) bubble sort
+  mov               r0, r6
+  mov               r1, r5
+  bl                bubbleSort
+
+  # print sorted array
+  mov               r0, r6
+  mov               r1, r5
+  bl                printIntArray
+
+  # e) median value
+  sub               r0, r5, #1                              @ 0-based length
+  lsr               r0, r0, #1                              @ median index = length / 2
+  mov               r1, #size_t                             @ size_t
+  mla               r2, r0, r1, r6                          @ median address = base addr + median index * size_t
+
+  # print median value
+  ldr               r0, =medianOutput
+  ldr               r1, [r2, #0]
+  bl                printf
 
   b               exit
 
