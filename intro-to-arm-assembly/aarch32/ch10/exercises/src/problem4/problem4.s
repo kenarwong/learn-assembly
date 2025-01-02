@@ -1,6 +1,6 @@
 @ Program name:       problem4.s
 @ Author:             Ken Hwang
-@ Date:               1/2/2024
+@ Date:               1/2/2025
 @ Purpose:            Create k-strings from a binary set
 
 @ Constant program data

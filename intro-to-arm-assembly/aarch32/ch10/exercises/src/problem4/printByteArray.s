@@ -1,6 +1,6 @@
 @ Program name:       printByteArray
 @ Author:             Ken Hwang
-@ Date:               1/2/2024
+@ Date:               1/2/2025
 @ Purpose:            Print a byte array
 @ Input:              r0 - array base
 @                     r1 - byte array length
