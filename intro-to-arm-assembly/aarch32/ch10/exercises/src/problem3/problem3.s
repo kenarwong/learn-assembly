@@ -140,6 +140,10 @@ main:
   ldr               r1, [r2, #0]
   bl                printf
 
+  # free memory
+  mov               r0, r6
+  bl                free
+
   b               exit
 
   invalidInput:

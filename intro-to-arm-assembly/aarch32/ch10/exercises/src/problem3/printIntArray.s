@@ -1,7 +1,7 @@
 @ Program name:       printIntArray
 @ Author:             Ken Hwang
 @ Date:               12/30/2024
-@ Purpose:            Print an int array
+@ Purpose:            Print a int array
 @ Input:              r0 - array base
 @                     r1 - array length
 

@@ -1,7 +1,7 @@
 @ Program name:       bubbleSort
 @ Author:             Ken Hwang
 @ Date:               12/30/2024
-@ Purpose:            Bubble sort an array
+@ Purpose:            Bubble sort an int array
 @ Input:              r0 - array base
 @                     r1 - array length
 
