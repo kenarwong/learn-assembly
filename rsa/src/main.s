@@ -16,6 +16,10 @@ input:
   .asciz "%d"
 output:
   .asciz "your number is %d\n"
+outputP:
+  .asciz "p: %d\n"
+outputQ:
+  .asciz "q: %d\n"
 error:
   .asciz "You entered invalid input.\n"
 publicKey:
@@ -73,27 +77,67 @@ main:
       cmp           r2, r3
       beq           invalidInput                                  @ available value not found    
 
-      ldr           r4, [r1, r2, lsl #2]                          @ pre-index addressing
+      ldr           r4, [r1, r2, lsl #2]                          @ r4 = e
       cmp           r0, r4
-      beq           exitPromptValueE                              @ value found, exit loop
+      beq           exitPromptValueE                              @ value confirmed, exit loop
 
       add           r2, r2, #1                                    @ index++
       b             loopFermatNumbers   
 
   exitPromptValueE:
 
-  # generate prime numbers
-  ldr               r0, =bitLength                                @ bit length (k)            
-  lsr               r0, r0, #1                                    @ k/2
+  # set seed
+  mov               r0, 0x55                                
+  bl                srand                                  
 
-  generatePrimeNumbersLoop:
+  # generate p and q
+  ldr               r0, =bitLength                                
+  ldr               r5, [r0, #0]                                  @ r5 = bit length (k)            
+  lsr               r6, r5, #1                                    @ r6 = k/2
+
+  generateP:
+    # generate prime number p
+    mov               r0, r6
     bl                genprime
+    mov               r7, r0                                      @ r7 = p
 
-    b                generatePrimeNumbersLoop
+    # validate p is coprime, gcd(e, p-1) == 1
+    mov               r0, r4
+    sub               r1, r7, #1
+    bl                gcd
+
+    cmp               r0, #1
+    bne               generateP                                   @ not coprime, try again
+
+    # display P
+    ldr               r0, =outputP
+    mov               r1, r7
+    bl                printf
+
+  generateQ:
+    # generate prime number q
+    sub               r0, r5, r6                                  @ k - k/2         
+    bl                genprime
+    mov               r8, r0                                      @ r8 = q
+
+    # validate p != q
+    cmp               r7, r8                                                        
+    beq               generateQ                                   @ p == q, try again
+
+    # validate q is coprime, gcd(e, q-1) == 1
+    mov               r0, r4
+    sub               r1, r8, #1
+    bl                gcd
+
+    cmp               r0, #1
+    bne               generateQ                                   @ not coprime, try again
+
+    # display Q
+    ldr               r0, =outputQ
+    mov               r1, r8
+    bl                printf
 
   exitGeneratePrimeNumbersLoop:
-
-  # mov               r1, r0
 
   # # allocate memory
   # mov               r4, 0x4                                 @ size_t (4 bytes)
@@ -102,9 +146,10 @@ main:
   # bl                calloc                                  
   # mov               r5, r0                                  @ base address
 
-  # print
-  ldr               r0, =output
-  bl                printf
+  # # print
+  # mov               r1, r0
+  # ldr               r0, =output
+  # bl                printf
 
   b                 exit
 

@@ -6,7 +6,10 @@
 @ Program name:       gcd
 @ Author:             Ken Hwang
 @ Date:               1/17/2024
-@ Purpose:            Fidns greatest common divisor of two numbers (euclidean algorithm)
+@ Purpose:            Find greatest common divisor of two numbers using euclidean algorithm
+@ Input:              r0 - first value (a)
+@                     r1 - second value (b)
+@ Output:             r0 - greatest common divisor
 
 @ Program code
         .equ    temp1,  -8
@@ -26,24 +29,36 @@ gcd:
   sub               sp, sp, #locals
   str               r4, [fp, #temp1]
   str               r5, [fp, #temp2]
+
+  loopGCD:
+    cmp             r1, #0
+    beq             exitGCD                 @ if b == 0, then exit
+
+    # modulo and swap
+    mov             r4, r1                  @ temp = b
+    bl              modulo                  @ r1 = a % b        
+    mov             r0, r4                  @ a = temp    
+
+    b               loopGCD
   
-  ldr             r5, [fp, #temp2]
-  ldr             r4, [fp, #temp1]
-  add             sp, sp, #locals
-  ldr             fp, [sp, #0]
-  ldr             lr, [sp, #4]
-  add             sp, sp, #8
-  bx              lr 
+  exitGCD:
+    ldr             r5, [fp, #temp2]
+    ldr             r4, [fp, #temp1]
+    add             sp, sp, #locals
+    ldr             fp, [sp, #0]
+    ldr             lr, [sp, #4]
+    add             sp, sp, #8
+    bx              lr 
 
 @ Program name:       pow
 @ Author:             Ken Hwang
 @ Date:               1/17/2024
 @ Purpose:            Performs exponentiation by squaring
+@ Input:              r0 - base (b)
+@                     r1 - exponent (e)
+@ Output:             r0 - result (b^e)
 
 @ Program code
-        .equ    temp1,  -8
-        .equ    temp2,  -12
-        .equ    locals,  8
         .text
         .align  2
         .global pow
@@ -56,12 +71,25 @@ pow:
   str               lr, [sp, #4]
   add               fp, sp, #4
   sub               sp, sp, #locals
-  str               r4, [fp, #temp1]
-  str               r5, [fp, #temp2]
+
+  # initialize
+  mov		            r2, #1		              @ result
+   
+  loopExponent:	
+    cmp             r1, #0		               
+    ble             exitLoopExponent		    @ if e <= 0, then exit 
+
+    tst             r1, #1                  @ if e is odd (bitwise AND), z = 0 (zero flag cleared)
+    mulne           r2, r2, r0              @ result *= b (ne: z = 0)
+
+    mul             r0, r0, r0              @ b = b^2 
+    lsr             r1, r1, #1              @ e >> 1
+    b               loopExponent            @ if n != 0, repeat 
   
-  ldr             r5, [fp, #temp2]
-  ldr             r4, [fp, #temp1]
-  add             sp, sp, #locals
+  exitLoopExponent:
+
+  mov             r0, r2                    @ r0 = result
+  
   ldr             fp, [sp, #0]
   ldr             lr, [sp, #4]
   add             sp, sp, #8
@@ -95,7 +123,7 @@ modulo:
   str               r4, [fp, #temp1]
   str               r5, [fp, #temp2]
 
-  bl                aeabi_idivmod
+  bl                 __aeabi_idivmod
   
   ldr               r5, [fp, #temp2]
   ldr               r4, [fp, #temp1]
@@ -186,12 +214,17 @@ modulo:
 @ Program name:       checkprime
 @ Author:             Ken Hwang
 @ Date:               1/17/2024
-@ Purpose:            Check if number is prime (Rabin-Miller primality test)
+@ Purpose:            Check if number is prime 
+@ Input:              r0 - number
+@ Output:             r0 - 1 is prime, 0 is not prime
 
 @ Program code
-        .equ    temp1,  -8
-        .equ    temp2,  -16
-        .equ    locals,  8
+        .equ    temp1, -8
+        .equ    temp2, -12
+        .equ    temp3, -16
+        .equ    temp4, -20
+        .equ    temp5, -24
+        .equ    locals, 20
         .text
         .align  2
         .global checkprime
@@ -204,15 +237,79 @@ checkprime:
   str               lr, [sp, #4]
   add               fp, sp, #4
   sub               sp, sp, #locals
-  str               r4, [fp, #temp1]
-  str               r5, [fp, #temp2]
+  str               r4, [fp, temp1]
+  str               r5, [fp, temp2]
+  str               r6, [fp, temp3]
+  str               r7, [fp, temp4]
+
+  mov               r4, r0                                  @ n
+  mov               r5, #0                                  @ return value (initialize as 0)
+
+  # initialize loop
+  mov               r6, #2                                  @ i
+  lsr               r7, r4, #1                              @ n/2
+
+  # loop check 2 -> n/2
+  checkPrimeLoop:
+    cmp             r6, r7              
+    bgt             primeFound                              @ i > n/2
+
+    mov             r0, r4
+    mov             r1, r6
+    bl              modulo                                  @ n % i
+
+    cmp             r1, #0
+    beq             exitCheckPrime                          @ n % i == 0 (i.e. divisible)
+
+    add             r6, r6, #1                              @ i++
+    b               checkPrimeLoop
+
+  primeFound:
+    mov             r5, #1
+
+  exitCheckPrime:
+    mov             r0, r5
   
-  ldr             r5, [fp, #temp2]
-  ldr             r4, [fp, #temp1]
+  ldr             r7, [fp, temp4]
+  ldr             r6, [fp, temp3]
+  ldr             r5, [fp, temp2]
+  ldr             r4, [fp, temp1]
   add             sp, sp, #locals
   ldr             fp, [sp, #0]
   ldr             lr, [sp, #4]
   add             sp, sp, #8
   bx              lr 
 
-  .section  .note.GNU-stack,"",%progbits
+@ Program name:       modinv
+@ Author:             Ken Hwang
+@ Date:               1/17/2024
+@ Purpose:            Calculate modular inverse
+@ Input:              r0 -         
+@                     r1 -        
+
+@ Program code
+        .equ    temp1,  -8
+        .equ    temp2,  -12
+        .equ    locals,  8
+        .text
+        .align  2
+        .global modinv
+        .syntax unified
+        .type   modinv, %function
+
+modinv:
+  sub               sp, sp, #8
+  str               fp, [sp, #0]
+  str               lr, [sp, #4]
+  add               fp, sp, #4
+  sub               sp, sp, #locals
+  str               r4, [fp, #temp1]
+  str               r5, [fp, #temp2]
+
+  ldr               r5, [fp, #temp2]
+  ldr               r4, [fp, #temp1]
+  add               sp, sp, #locals
+  ldr               fp, [sp, #0]
+  ldr               lr, [sp, #4]
+  add               sp, sp, #8
+  bx                lr 
