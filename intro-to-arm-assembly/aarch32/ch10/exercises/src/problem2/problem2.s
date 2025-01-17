@@ -111,8 +111,8 @@ main:
     bl              printf
   
   exit:
-    str             r5, [fp, #temp2]
-    str             r4, [fp, #temp1]
+    ldr             r5, [fp, #temp2]
+    ldr             r4, [fp, #temp1]
     add             sp, sp, #locals
     mov             r0, #0
     ldr             fp, [sp, #0]
