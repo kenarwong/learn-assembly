@@ -6,40 +6,30 @@
 @ Constant program data
         .section  .rodata
         .align  2
-prompt1:
-  .asciz "Enter a value for e, please choose between the following Fermat numbers (3, 5, 17, 257, 65537): "
 # __main_separator:
 #   .asciz ", "
 # __main_newline:
 #   .aciz "\n"
-input:
-  .asciz "%d"
 output:
   .asciz "your number is %d\n"
 outputP:
   .asciz "p: %d\n"
 outputQ:
   .asciz "q: %d\n"
-error:
-  .asciz "You entered invalid input.\n"
 publicKey:
   .asciz "Public Key: %d\n"
 privateKey:
   .asciz "Private Key: %d\n"
 bitLength:
-  .word 0x10                                                      @ 16-bit length (k)
-fermatNumbers:
-  .word 0x3, 0x5, 0x11, 0x101, 0x10001                            @ First five Fermat numbers (e)
+  .word  0x10                                                      @ 16-bit length (k)
 
 @ Program code
-        .equ    userValueE,             -8
         .equ    temp1,                  -12
-        .equ    temp2,                  -16
-        .equ    temp3,                  -20
-        .equ    temp4,                  -24
-        .equ    temp5,                  -28
-        .equ    locals,                  24
-        .equ    numberOfFermatNumbers,   5
+        .equ    temp2,                  -12
+        .equ    temp3,                  -16
+        .equ    temp4,                  -20
+        .equ    temp5,                  -24
+        .equ    locals,                  20
         .text
         .align  2
         .global main
@@ -58,42 +48,23 @@ main:
   str               r7, [fp, #temp4]
   str               r8, [fp, #temp5]
 
-  # prompt for value (e)
-  promptValueE:
-    ldr             r0, =prompt1
-    bl              printf
-    
-    ldr             r0, =input
-    add             r1, fp, userValueE
-    bl              scanf
-    ldr             r0, [fp, userValueE]                          @ user input
-    
-    # validate e
-    ldr             r1, =fermatNumbers
-    mov             r2, #0                                        @ index
-    mov             r3, #numberOfFermatNumbers                       
+  # get public exponent
+  bl                cpubexp
+  mov               r4, r0                                        @ r4 = e 
 
-    loopFermatNumbers:
-      cmp           r2, r3
-      beq           invalidInput                                  @ available value not found    
-
-      ldr           r4, [r1, r2, lsl #2]                          @ r4 = e
-      cmp           r0, r4
-      beq           exitPromptValueE                              @ value confirmed, exit loop
-
-      add           r2, r2, #1                                    @ index++
-      b             loopFermatNumbers   
-
-  exitPromptValueE:
+  # display public key
+  ldr               r0, =publicKey
+  mov               r1, r4
+  bl                printf
 
   # set seed
-  mov               r0, 0x55                                
+  mov               r0, 0x00                                
   bl                srand                                  
 
   # generate p and q
   ldr               r0, =bitLength                                
-  ldr               r5, [r0, #0]                                  @ r5 = bit length (k)            
-  lsr               r6, r5, #1                                    @ r6 = k/2
+  ldr               r5, [r0, #0]                                  @ r5 = modulus bit length (k)            
+  lsr               r6, r5, #1                                    @ r6 = p and q bit length (k/2)
 
   generateP:
     # generate prime number p
@@ -137,7 +108,20 @@ main:
     mov               r1, r8
     bl                printf
 
-  exitGeneratePrimeNumbersLoop:
+  # calculate n
+  mul                 r5, r7, r8                                  @ n = p * q
+
+  # calculate private key
+  mov                 r0, r4
+  mov                 r1, r7
+  mov                 r1, r8
+  bl                  cprivexp                                    @ cprivexp(e, p, q)
+  mov                 r6, r0                                      @ r6 = d
+
+  # display private key 
+  ldr               r0, =privateKey
+  mov               r1, r6
+  bl                printf
 
   # # allocate memory
   # mov               r4, 0x4                                 @ size_t (4 bytes)
@@ -153,10 +137,10 @@ main:
 
   b                 exit
 
-  invalidInput:
-    # print error
-    ldr             r0, =error
-    bl              printf
+  # invalidInput:
+  #   # print error
+  #   ldr             r0, =error
+  #   bl              printf
   
   exit:
     ldr             r8, [fp, #temp5]

@@ -133,38 +133,40 @@ modulo:
   add               sp, sp, #8
   bx                lr 
 
-# @ Program name:       divide
-# @ Author:             Ken Hwang
-# @ Date:               1/17/2024
-# @ Purpose:            Perform 32-bit division
-# @ Input:              r0 - dividend
-# @                     r1 - divisor
-# @ Output:             r0 - quotient
-# @                     r1 - remainder
-# 
-# @ Program code
-#         .equ    temp1,      -8
-#         .equ    temp2,      -12
-#         .equ    temp3,      -16
-#         .equ    temp4,      -20
-#         .equ    temp5,      -24
-#         .equ    locals,      20
-#         .equ    bitLength,   0x10
-#         .text
-#         .align  2
-#         .global divide
-#         .syntax unified
-#         .type   divide, %function
-# 
-# divide:
-#   sub               sp, sp, #8
-#   str               fp, [sp, #0]
-#   str               lr, [sp, #4]
-#   add               fp, sp, #4
-#   sub               sp, sp, #locals
-#   str               r4, [fp, #temp1]
-#   str               r5, [fp, #temp2]
-# 
+@ Program name:       divide
+@ Author:             Ken Hwang
+@ Date:               1/17/2024
+@ Purpose:            Perform 32-bit division
+@ Input:              r0 - dividend
+@                     r1 - divisor
+@ Output:             r0 - quotient
+@                     r1 - remainder
+
+@ Program code
+        .equ    temp1,      -8
+        .equ    temp2,      -12
+        .equ    temp3,      -16
+        .equ    temp4,      -20
+        .equ    temp5,      -24
+        .equ    locals,      20
+        # .equ    bitLength,   0x10
+        .text
+        .align  2
+        .global divide
+        .syntax unified
+        .type   divide, %function
+
+divide:
+  sub               sp, sp, #8
+  str               fp, [sp, #0]
+  str               lr, [sp, #4]
+  add               fp, sp, #4
+  sub               sp, sp, #locals
+  str               r4, [fp, #temp1]
+  str               r5, [fp, #temp2]
+
+  bl                __aeabi_idivmod
+
 #   # 2's complement of divisor
 #   mvn               r1, r1              
 #   add               r1, r1, #1
@@ -203,13 +205,13 @@ modulo:
 # 
 #   exitloop:
 #   
-#   ldr             r5, [fp, #temp2]
-#   ldr             r4, [fp, #temp1]
-#   add             sp, sp, #locals
-#   ldr             fp, [sp, #0]
-#   ldr             lr, [sp, #4]
-#   add             sp, sp, #8
-#   bx              lr 
+  ldr             r5, [fp, #temp2]
+  ldr             r4, [fp, #temp1]
+  add             sp, sp, #locals
+  ldr             fp, [sp, #0]
+  ldr             lr, [sp, #4]
+  add             sp, sp, #8
+  bx              lr 
 
 @ Program name:       checkprime
 @ Author:             Ken Hwang
@@ -283,14 +285,20 @@ checkprime:
 @ Program name:       modinv
 @ Author:             Ken Hwang
 @ Date:               1/17/2024
-@ Purpose:            Calculate modular inverse
-@ Input:              r0 -         
-@                     r1 -        
+@ Purpose:            Calculate modular multiplicative inverse of a, where a*x = 1 (mod m)
+@                     Using euclidean algorithm, assumes positive integers
+@ Input:              r0 - value (a)
+@                     r1 - value (m)
+@ Output:             r0 - modular inverse (x)
 
 @ Program code
         .equ    temp1,  -8
         .equ    temp2,  -12
-        .equ    locals,  8
+        .equ    temp3,  -16
+        .equ    temp4,  -20
+        .equ    temp5,  -24
+        .equ    temp6,  -28
+        .equ    locals,  24
         .text
         .align  2
         .global modinv
@@ -305,11 +313,80 @@ modinv:
   sub               sp, sp, #locals
   str               r4, [fp, #temp1]
   str               r5, [fp, #temp2]
+  str               r6, [fp, #temp3]
+  str               r7, [fp, #temp4]
+  str               r8, [fp, #temp5]
+  str               r9, [fp, #temp6]
 
-  ldr               r5, [fp, #temp2]
-  ldr               r4, [fp, #temp1]
-  add               sp, sp, #locals
-  ldr               fp, [sp, #0]
-  ldr               lr, [sp, #4]
-  add               sp, sp, #8
-  bx                lr 
+  mov               r4, r0                                  @ a
+  mov               r5, r1                                  @ m
+
+  # check that inverse exists, gcd(a, m) == 1
+  bl                gcd
+  cmp               r0, #1
+  bne               noModinv
+
+  # initialize
+  mov               r6, #0                                  @ t
+  mov               r7, #1                                  @ newt
+  mov               r8, r5                                  @ r = m
+  mov               r9, r4                                  @ newr = a
+
+  modinvLoop:
+    cmp             r9, #0
+    beq             modinvEndLoop
+
+    # quotient = r / newr
+    mov             r0, r8
+    mov             r1, r9
+    bl              divide
+    mov             r2, r0                                  
+
+    # tmp = t - quotient * newt
+    mul             r0, r2, r7                                     
+    sub             r0, r6, r0                              
+
+    # t = newt, newt = tmp
+    mov             r6, r7
+    mov             r7, r0
+
+    # tmp = r - quotient * newr
+    mul             r0, r2, r9
+    sub             r0, r8, r0
+
+    # r = newr, newr = tmp
+    mov             r8, r9
+    mov             r9, r0
+
+    b               modinvLoop
+
+  modinvEndLoop:
+    cmp             r8, #1
+    bgt             noModinv                                 @ r > 1         
+
+    cmp             r6, #0
+    bge             modinvDone                               @ t >= 0   
+
+    add             r6, r6, r5                               @ t += m
+
+  modinvDone:
+    mov             r0, r6
+    b               exitModinv
+
+  noModinv:
+    mov             r0, #0                                   @ no inverse          
+    b               exitModinv
+
+  exitModinv:
+
+    ldr             r9, [fp, #temp6]
+    ldr             r8, [fp, #temp5]
+    ldr             r7, [fp, #temp4]
+    ldr             r6, [fp, #temp3]
+    ldr             r5, [fp, #temp2]
+    ldr             r4, [fp, #temp1]
+    add             sp, sp, #locals
+    ldr             fp, [sp, #0]
+    ldr             lr, [sp, #4]
+    add             sp, sp, #8
+    bx              lr 
