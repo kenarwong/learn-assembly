@@ -13,7 +13,7 @@
 __main_promptMessage:
   .asciz "Type a message: "
 __main_messageFormat:
-  .asciz "%49s\n"                                                  
+  .ascii  "%49[^\n]\000"
 __main_outputP:
   .asciz "p: %d\n"
 __main_outputQ:
@@ -41,8 +41,7 @@ stream:
         .equ    temp3,                  -16
         .equ    temp4,                  -20
         .equ    temp5,                  -24
-        # .equ    numberOfChars,          -28
-        .equ    locals,                  24
+        .equ    locals,                  20
         .equ    seed,                   0x00
         .equ    size_t,                 1                           @ size of char in bytes
         .text
@@ -156,15 +155,10 @@ main:
   ldr                 r0, =__main_promptMessage
   bl                  printf
 
-  # ldr                 r0, =__main_messageFormat
-  # mov                 r1, r5                                        @ string address
-  # add                 r2, fp, numberOfChars                         @ record number of characters scanned
-  
-  mov     r0, r5
-  mov     r1, r4
-  ldr     r3, =stream
-  ldr     r2, [r3]
-  bl      fgets
+  ldr                 r0, =__main_messageFormat
+  mov                 r1, r5                                        @ string address
+  bl                  scanf 
+  bl                  getchar 
 
   # create file for writing
   ldr                 r0, =filename
