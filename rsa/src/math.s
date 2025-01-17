@@ -13,8 +13,7 @@
 
 @ Program code
         .equ    temp1,  -8
-        .equ    temp2,  -12
-        .equ    locals,  8
+        .equ    locals,  4
         .text
         .align  2
         .global gcd
@@ -28,7 +27,6 @@ gcd:
   add               fp, sp, #4
   sub               sp, sp, #locals
   str               r4, [fp, #temp1]
-  str               r5, [fp, #temp2]
 
   loopGCD:
     cmp             r1, #0
@@ -42,7 +40,6 @@ gcd:
     b               loopGCD
   
   exitGCD:
-    ldr             r5, [fp, #temp2]
     ldr             r4, [fp, #temp1]
     add             sp, sp, #locals
     ldr             fp, [sp, #0]
@@ -70,7 +67,6 @@ pow:
   str               fp, [sp, #0]
   str               lr, [sp, #4]
   add               fp, sp, #4
-  sub               sp, sp, #locals
 
   # initialize
   mov		            r2, #1		              @ result
@@ -105,9 +101,6 @@ pow:
 @                     r1 - remainder
 
 @ Program code
-        .equ    temp1,  -8
-        .equ    temp2,  -12
-        .equ    locals,  8
         .text
         .align  2
         .global modulo
@@ -119,15 +112,9 @@ modulo:
   str               fp, [sp, #0]
   str               lr, [sp, #4]
   add               fp, sp, #4
-  sub               sp, sp, #locals
-  str               r4, [fp, #temp1]
-  str               r5, [fp, #temp2]
 
   bl                 __aeabi_idivmod
   
-  ldr               r5, [fp, #temp2]
-  ldr               r4, [fp, #temp1]
-  add               sp, sp, #locals
   ldr               fp, [sp, #0]
   ldr               lr, [sp, #4]
   add               sp, sp, #8
@@ -225,8 +212,7 @@ divide:
         .equ    temp2, -12
         .equ    temp3, -16
         .equ    temp4, -20
-        .equ    temp5, -24
-        .equ    locals, 20
+        .equ    locals, 16
         .text
         .align  2
         .global checkprime
@@ -286,8 +272,8 @@ checkprime:
 @ Author:             Ken Hwang
 @ Date:               1/17/2024
 @ Purpose:            Calculate modular multiplicative inverse of a, where a*x = 1 (mod m)
-@                     Extended euclidean algorithm
-@                     Assumes inverse x (Bézout coefficient) is a positive integer
+@                     Uses extended euclidean algorithm to calculate series of Bézout coefficients (only one is needed)
+@                     Assumes multiplicative inverse x (Bézout coefficient) is a positive integer
 @                     If gcd(a, m) != 1, then no inverse exists
 @ Input:              r0 - value (a)
 @                     r1 - value (m)
@@ -367,19 +353,19 @@ modinv:
 
   modinvEndLoop:
     cmp             r8, #1
-    bgt             noModinv                                 @ r > 1         
+    bgt             noModinv                                 @ if r > 1, no inverse        
 
     cmp             r6, #0
-    bge             modinvDone                               @ x >= 0   
+    bge             modinvDone                               @ if x >= 0, return positive x 
 
-    add             r6, r6, r5                               @ x += m
+    add             r6, r6, r5                               @ x += m, make x positive 
 
   modinvDone:
     mov             r0, r6
     b               exitModinv
 
   noModinv:
-    mov             r0, #0                                   @ no inverse          
+    mov             r0, #0                                   @ no inverse
     b               exitModinv
 
   exitModinv:

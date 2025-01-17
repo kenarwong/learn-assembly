@@ -1,4 +1,4 @@
-@ Program name:       calc.s
+@ Program name:       lib.s
 @ Author:             Ken Hwang
 @ Date:               1/17/2024
 @ Purpose:            Library of helper functions
