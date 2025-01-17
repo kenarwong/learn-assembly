@@ -7,12 +7,16 @@ DEBUG_PORT                  := 10101
 BIN 												:= bin
 SRC 												:= src
 
-EXECUTABLE									:= main
+EXECUTABLE 									:= main
 
 all: $(BIN)/$(EXECUTABLE)
 
+# $(BIN)/$(EXECUTABLE): $(SRC)/*.s
+# 	@echo "Making file: $(BIN)/$(EXECUTABLE)"
+# 	$(ASM)-as $< -o $@ $(ASM_FLAGS)
+# 	$(ASM)-gcc $^ -o $@ $(LINK_FLAGS)
 
-$(BIN)/$(EXECUTABLE): $(SRC)/*.s
+$(BIN)/$(EXECUTABLE): $(SRC)/main.s $(SRC)/calc.s $(SRC)/math.s
 	@echo "Making file: $(BIN)/$(EXECUTABLE)"
 	$(ASM)-as $^ -o $(BIN)/$(EXECUTABLE).o $(ASM_FLAGS)
 	$(ASM)-gcc $(BIN)/$(EXECUTABLE).o -o $@ $(LINK_FLAGS)

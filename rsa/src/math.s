@@ -286,10 +286,12 @@ checkprime:
 @ Author:             Ken Hwang
 @ Date:               1/17/2024
 @ Purpose:            Calculate modular multiplicative inverse of a, where a*x = 1 (mod m)
-@                     Using euclidean algorithm, assumes positive integers
+@                     Extended euclidean algorithm
+@                     Assumes inverse x (Bézout coefficient) is a positive integer
+@                     If gcd(a, m) != 1, then no inverse exists
 @ Input:              r0 - value (a)
 @                     r1 - value (m)
-@ Output:             r0 - modular inverse (x)
+@ Output:             r0 - multiplicative inverse (x)
 
 @ Program code
         .equ    temp1,  -8
@@ -327,36 +329,39 @@ modinv:
   bne               noModinv
 
   # initialize
-  mov               r6, #0                                  @ t
-  mov               r7, #1                                  @ newt
+  mov               r6, #0                                  @ x
+  mov               r7, #1                                  @ nextx
   mov               r8, r5                                  @ r = m
-  mov               r9, r4                                  @ newr = a
+  mov               r9, r4                                  @ nextr = a
 
+  # euclidean division loop
   modinvLoop:
     cmp             r9, #0
     beq             modinvEndLoop
 
-    # quotient = r / newr
+    # quotient = r / nextr
     mov             r0, r8
     mov             r1, r9
     bl              divide
     mov             r2, r0                                  
 
-    # tmp = t - quotient * newt
-    mul             r0, r2, r7                                     
-    sub             r0, r6, r0                              
+    # tmp = x - quotient * nextx
+    mov             r0, r7
+    mul             r1, r2, r7                                     
+    sub             r1, r6, r1
 
-    # t = newt, newt = tmp
-    mov             r6, r7
-    mov             r7, r0
+    # x = nextx, nextx = tmp
+    mov             r6, r0
+    mov             r7, r1
 
-    # tmp = r - quotient * newr
-    mul             r0, r2, r9
-    sub             r0, r8, r0
+    # tmp = r - quotient * nextr
+    mov             r0, r9
+    mul             r1, r2, r9
+    sub             r1, r8, r1
 
-    # r = newr, newr = tmp
-    mov             r8, r9
-    mov             r9, r0
+    # r = nextr, nextr = tmp
+    mov             r8, r0
+    mov             r9, r1
 
     b               modinvLoop
 
@@ -365,9 +370,9 @@ modinv:
     bgt             noModinv                                 @ r > 1         
 
     cmp             r6, #0
-    bge             modinvDone                               @ t >= 0   
+    bge             modinvDone                               @ x >= 0   
 
-    add             r6, r6, r5                               @ t += m
+    add             r6, r6, r5                               @ x += m
 
   modinvDone:
     mov             r0, r6
@@ -390,3 +395,5 @@ modinv:
     ldr             lr, [sp, #4]
     add             sp, sp, #8
     bx              lr 
+
+  .section  .note.GNU-stack,"",%progbits

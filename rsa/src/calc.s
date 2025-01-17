@@ -119,7 +119,7 @@ cprivexp:
 
   # choose d such that d is coprime to phi(n)
   # e*d = 1 (mod phi(n))
-  # calculate modular inverse of e modulo phi(n)
+  # calculate multiplicative inverse of e modulo phi(n)
   mov               r0, r4
   mov               r1, r2
   bl                modinv                                        @ r0 = modinv(e, phi(n))
@@ -269,3 +269,5 @@ genprime:
     ldr               lr, [sp, #4]
     add               sp, sp, #8
     bx                lr 
+
+  .section  .note.GNU-stack,"",%progbits

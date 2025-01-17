@@ -24,12 +24,13 @@ bitLength:
   .word  0x10                                                      @ 16-bit length (k)
 
 @ Program code
-        .equ    temp1,                  -12
+        .equ    temp1,                  -8
         .equ    temp2,                  -12
         .equ    temp3,                  -16
         .equ    temp4,                  -20
         .equ    temp5,                  -24
         .equ    locals,                  20
+        .equ    seed,                   0xff
         .text
         .align  2
         .global main
@@ -58,7 +59,7 @@ main:
   bl                printf
 
   # set seed
-  mov               r0, 0x00                                
+  mov               r0, #seed                                
   bl                srand                                  
 
   # generate p and q
@@ -114,7 +115,7 @@ main:
   # calculate private key
   mov                 r0, r4
   mov                 r1, r7
-  mov                 r1, r8
+  mov                 r2, r8
   bl                  cprivexp                                    @ cprivexp(e, p, q)
   mov                 r6, r0                                      @ r6 = d
 
