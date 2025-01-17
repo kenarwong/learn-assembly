@@ -1,5 +1,5 @@
 ASM													:= arm-linux-gnueabihf
-ASM_FLAGS										:= --gstabs -march=armv6+fp
+ASM_FLAGS										:= --gstabs -march=armv6+fp # -fno-omit-frame-pointer
 LINK_FLAGS 									:= -static
 DEBUG_ARCH                  := armv6
 DEBUG_PORT                  := 10101
