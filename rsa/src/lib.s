@@ -440,7 +440,7 @@ genprime:
 @ Program name:       readfile
 @ Author:             Ken Hwang
 @ Date:               1/18/2024
-@ Purpose:            Read file of variable length and store at memory location
+@ Purpose:            Read file by line and store at memory location
 @ Input:              r0 - file pointer
 @                     r1 - memory save location
 @ Output:             r0 - number of characters read
@@ -480,7 +480,7 @@ readfile:
 
   mov               r4, r0                                          @ r4 = file pointer
   mov               r5, r1                                          @ r5 = memory location
-  mov               r6, #0                                          @ r6 = chararcters read
+  mov               r6, #0                                          @ r6 = characters read
 
   # allocate buffer
   ldr                 r7, =bufferSize                              
@@ -501,7 +501,7 @@ readfile:
 
     # calculate number of characters read in buffer
     mov               r0, r8                                        @ buffer address
-    bl                strlen
+    bl                strlen        
     mov               r9, r0                                        @ r9 = number of characters read
     add               r6, r6, r9                                    @ increment total characters 
 
@@ -537,6 +537,65 @@ readfile:
   ldr                 r8, [fp, #temp5]
   ldr                 r7, [fp, #temp4]
   ldr                 r6, [fp, #temp3]
+  ldr                 r5, [fp, #temp2]
+  ldr                 r4, [fp, #temp1]
+  add                 sp, sp, #locals
+  ldr                 fp, [sp, #0]
+  ldr                 lr, [sp, #4]
+  add                 sp, sp, #8
+  bx                  lr 
+
+@ Program name:       fsize
+@ Author:             Ken Hwang
+@ Date:               1/18/2024
+@ Purpose:            Get file size
+@ Input:              r0 - file pointer
+@ Output:             r0 - file size in bytes
+
+@ Program code
+        .equ    temp1,                  -8
+        .equ    temp2,                  -12
+        .equ    locals,                  8
+        .equ    SEEK_SET,               0                           @ set file pointer to beginning
+        .equ    SEEK_END,               2                           @ set file pointer to end
+        .text
+        .align  2
+        .global fsize
+        .syntax unified
+        .type   fsize, %function
+
+fsize:
+  sub                 sp, sp, #8
+  str                 fp, [sp, #0]
+  str                 lr, [sp, #4]
+  add                 fp, sp, #4
+  sub                 sp, sp, #locals
+  str                 r4, [fp, #temp1]
+  str                 r5, [fp, #temp2]
+
+  mov                 r4, r0                                        @ r4 = file pointer
+  mov                 r5, r1                                        @ r5 = file size
+
+  # set file pointer to end
+  mov                 r0, r4
+  mov                 r1, #0
+  mov                 r2, #SEEK_END
+  bl                  fseek
+
+  # get file size
+  mov                 r0, r4
+  bl                  ftell
+  mov                 r5, r0                                       @ file size
+
+  # set file pointer to beginning
+  mov                 r0, r4
+  mov                 r1, #0
+  mov                 r2, #SEEK_SET
+  bl                  fseek
+
+  # output file size
+  mov                 r0, r5                                    
+  
   ldr                 r5, [fp, #temp2]
   ldr                 r4, [fp, #temp1]
   add                 sp, sp, #locals

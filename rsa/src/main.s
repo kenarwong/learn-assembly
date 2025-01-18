@@ -196,7 +196,7 @@ main:
     # bl                  fprintf
 
     # write to file (fixed sized)
-    mov                 r0, r9                                        @ encrypted message address                
+    mov                 r0, r9                                        @ encrypted message address
     mov                 r1, #size_t
     mov                 r2, r10                                       @ number of characters
     mov                 r3, r8                                        @ file pointer      
@@ -220,7 +220,7 @@ main:
     ldr                 r10, [r10, #0]                                @ r10 = length of string
 
     mov                 r0, r10
-    mov                 r1, #size_t           
+    mov                 r1, #size_t          
     bl                  calloc
     mov                 r9, r0                                        @ r9 = encrypted string pointer
 
@@ -230,22 +230,36 @@ main:
     bl                  fopen  
     mov                 r8, r0                                        @ r8 = file pointer
 
-    # read from file
-    mov                 r0, r8                                        @ file pointer
-    mov                 r1, r9                                        @ encrypted message address
-    bl                  readfile                                      @ returns number of characters read 
+    # read lines from file
+    # fgets solution not working due to null characters in encrypted message
+    # mov                 r0, r8                                        @ file pointer
+    # mov                 r1, r9                                        @ encrypted message address
+    # bl                  readfile                                      @ returns number of characters read 
 
-    # calculate size of encrypted message 
+    # get file size
+    mov                 r0, r8
+    bl                  fsize
+    mov                 r10, r0                                       @ r10 = file size (bytes)
+
+    # read file 
+    mov                 r0, r9                                        @ encrypted message address
+    mov                 r1, #size_char                                     
+    mov                 r2, r10                                       @ number of bytes
+    mov                 r3, r8                                        @ file pointer
+    bl                  fread
+
+    # calculate size of original message 
+    mov                 r0, r10                                       @ file size
     mov                 r1, #size_t                                   @ size of encrypted char
-    bl                  divide                                        @ divide number of characters by size of encrypted char
-    mov                 r1, r0                                        @ number of characters
+    bl                  divide                                        @ r0 = file size / size of encrypted char
 
     # allocate memory for decrypted message
-    mov                 r0, r10
+    mov                 r1, #size_char
     bl                  calloc
     mov                 r7, r0                                        @ r7 = display message string pointer
 
   decryptMessage:
+
     # decrypt message
     mov                 r0, r7                                        @ display string address 
     mov                 r1, r9                                        @ encrypted message address
