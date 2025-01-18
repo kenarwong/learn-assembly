@@ -143,6 +143,12 @@ cprivexp:
 @                     r2 - public key (e)
 @                     r3 - modulus (n)
 
+@ Constant program data
+        .section  .rodata
+        .align  2
+__cpubexp_encryptMulOverflow:
+  .asciz "Error (encrypt): Multiplication overflow detected.\n"
+
 @ Program code
         .equ    temp1,                  -8
         .equ    temp2,                  -12
@@ -153,7 +159,7 @@ cprivexp:
         .equ    temp7,                  -32
         .equ    locals,                  28
         .equ    size_char,              1                           @ size of char in bytes
-        .equ    size_t,                 4                           @ size of int in bytes
+        .equ    size_t,                 2                           @ size of modulo in bytes
         .text
         .align  2
         .global encrypt
@@ -188,14 +194,16 @@ encrypt:
     mov             r5, #1                    @ c = 1
     mov             r10, r6                   @ r10 = e
 
-    # (m^e) mod n
+    # c = (m^e) mod n
     # only perform one exponentiation operation at a time followed by modulus to avoid overflow
     computeModExpLoop:
       cmp             r10, #0                   @ check if e == 0
       beq             storeEncryptedChar        @ if e == 0, store result
 
-      mul             r5, r5, r4                @ c = c * m
-                                                @ maximum bit length of c is 8 bits
+      umull           r5, r0, r5, r4            @ c = c * m
+                                                @ maximum byte size of intermediate multiplication is size_t + 1
+      cmp             r0, #0          
+      bne             encryptMulOverflow        @ upper byte != 0, overflow detected (1) 
 
       mov             r0, r5                    
       mov             r1, r7                    
@@ -208,7 +216,13 @@ encrypt:
     storeEncryptedChar:
       str           r5, [r9], #size_t       @ store encrypted char and increment pointer
 
+    # loop back to load next char
     b               loopEncrypt
+
+    encryptMulOverflow:
+      ldr             r0, =__cpubexp_encryptMulOverflow
+      bl              printf
+      b               exitEncrypt
 
   exitEncrypt:
     ldr             r10, [fp, #temp7]
@@ -233,6 +247,12 @@ encrypt:
 @                     r2 - private key (d)
 @                     r3 - modulus (n)
 
+@ Constant program data
+        .section  .rodata
+        .align  2
+__cpubexp_decryptMulOverflow:
+  .asciz "Error (decrypt): Multiplication overflow detected.\n"
+
 @ Program code
         .equ    temp1,                  -8
         .equ    temp2,                  -12
@@ -243,7 +263,7 @@ encrypt:
         .equ    temp7,                  -32
         .equ    locals,                  28
         .equ    size_char,              1                           @ size of char in bytes
-        .equ    size_t,                 4                           @ size of modulo in bytes
+        .equ    size_t,                 2                           @ size of modulo in bytes
         .text
         .align  2
         .global decrypt
@@ -270,7 +290,30 @@ decrypt:
   mov               r9, r1                                          @ r9 = encrypted string pointer 
 
   loopDecrypt:
-    ldr             r4, [r9], #size_t
+    # loop load encrypted char of size_t into register
+    mov             r0, #0
+    mov             r2, #size_char    
+    lsl             r2, r2, #3                                        @ shamt = size_char * 8 (bits)
+    eor             r4, r4, r4                                        @ r4 = encrypted char (c), bit length = size_t
+
+    loopEncryptedCharLoad:
+      cmp           r0, #size_t
+      beq           exitEncryptedCharLoadLoop                         @ reached size_t, begin decryption             
+
+      # calculate shift amount
+      mul             r3, r2, r0                                      @ r3 = size_char * 8 * i 
+
+      # load in byte, shift, and add to encrypted char, until size_t is filled
+      ldrb            r1, [r9], #size_char
+      lsl             r1, r1, r3                                      @ r1 = r1 << (size_char * 8 * i)
+      orr             r4, r4, r1                                      @ r4 = r4 | r1
+
+      add             r0, r0, #1
+      b               loopEncryptedCharLoad
+
+    exitEncryptedCharLoadLoop:
+
+    # check if end of encrypted string
     cmp             r4, #0
     beq             exitDecrypt                                     @ reached null terminator, exit
 
@@ -278,27 +321,35 @@ decrypt:
     mov             r5, #1                    @ m = 1
     mov             r10, r6                   @ r10 = d
 
-    # (c^d) mod n
+    # m = (c^d) mod n
     # only perform one exponentiation operation at a time followed by modulus to avoid overflow
     computeDecryptModExpLoop:
       cmp             r10, #0                   @ check if d == 0
       beq             storeDecryptedChar        @ if d == 0, store result
 
-      mul             r5, r5, r4                @ m = m * c
-                                                @ maximum bit length of c is 8 bits
+      umull           r5, r0, r5, r4            @ m = m * c
+                                                @ maximum byte size of intermediate multiplication is 2*size_t
+      cmp             r0, #0          
+      bne             decryptMulOverflow        @ upper byte != 0, overflow detected (1) 
 
       mov             r0, r5                    
       mov             r1, r7                    
-      bl              modulo                    @ r1 = c % n
+      bl              modulo                    @ r1 = m % n
       mov             r5, r1                    @ m = r1
 
       sub             r10, r10, #1              @ d--
       b               computeDecryptModExpLoop
 
     storeDecryptedChar:
-      str           r5, [r8], #size_char        @ store decrypted char and increment pointer
+      strb          r5, [r8], #size_char        @ store decrypted char and increment pointer
 
+    # loop back to load next encrypted char
     b               loopDecrypt
+
+  decryptMulOverflow:
+    ldr             r0, =__cpubexp_decryptMulOverflow
+    bl              printf
+    b               exitDecrypt
 
   exitDecrypt:
     ldr             r10, [fp, #temp7]

@@ -113,7 +113,7 @@ modulo:
   str               lr, [sp, #4]
   add               fp, sp, #4
 
-  bl                 __aeabi_idivmod
+  bl                 __aeabi_uidivmod
   
   ldr               fp, [sp, #0]
   ldr               lr, [sp, #4]
@@ -152,7 +152,7 @@ divide:
   str               r4, [fp, #temp1]
   str               r5, [fp, #temp2]
 
-  bl                __aeabi_idivmod
+  bl                __aeabi_uidivmod
 
 #   # 2's complement of divisor
 #   mvn               r1, r1              
@@ -191,7 +191,7 @@ divide:
 #     b               divideLoop
 # 
 #   exitloop:
-#   
+    
   ldr             r5, [fp, #temp2]
   ldr             r4, [fp, #temp1]
   add             sp, sp, #locals

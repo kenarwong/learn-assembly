@@ -34,6 +34,7 @@ readmode:
   .asciz "r"
 bitLength:
   .word  0x10                                                       @ 16-bit length (k)
+  # .word  0x20                                                       @ 32-bit length (k)
 stringCharLength:
   .word  50                                                        
 
@@ -48,7 +49,7 @@ stringCharLength:
         .equ    locals,                  28
         .equ    seed,                   0x00
         .equ    size_char,              1                           @ size of char in bytes
-        .equ    size_t,                 4                           @ size of modulo in bytes
+        .equ    size_t,                 2                           @ size of modulo in bytes
         .text
         .align  2
         .global main
