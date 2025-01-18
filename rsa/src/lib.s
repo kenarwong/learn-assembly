@@ -187,6 +187,8 @@ encrypt:
 
   loopEncrypt:
     ldrb            r4, [r8], #size_char
+
+    # check if end of string
     cmp             r4, #0
     beq             exitEncrypt                                     @ reached null terminator, exit
 
@@ -291,7 +293,7 @@ decrypt:
 
   loopDecrypt:
     # loop load encrypted char of size_t into register
-    mov             r0, #0
+    mov             r0, #0                                            @ i = 0
     mov             r2, #size_char    
     lsl             r2, r2, #3                                        @ shamt = size_char * 8 (bits)
     eor             r4, r4, r4                                        @ r4 = encrypted char (c), bit length = size_t
@@ -301,12 +303,11 @@ decrypt:
       beq           exitEncryptedCharLoadLoop                         @ reached size_t, begin decryption             
 
       # calculate shift amount
-      mul             r3, r2, r0                                      @ r3 = size_char * 8 * i 
+      mul             r3, r2, r0                                      @ r3 = shamt * i 
 
-      # load in byte, shift, and add to encrypted char, until size_t is filled
+      # load in byte, shift, and or into encrypted char 
       ldrb            r1, [r9], #size_char
-      lsl             r1, r1, r3                                      @ r1 = r1 << (size_char * 8 * i)
-      orr             r4, r4, r1                                      @ r4 = r4 | r1
+      orr             r4, r4, r1, lsl r3                              @ r4 = r4 | (r1 << r3)
 
       add             r0, r0, #1
       b               loopEncryptedCharLoad
@@ -435,5 +436,113 @@ genprime:
     ldr               lr, [sp, #4]
     add               sp, sp, #8
     bx                lr 
+
+@ Program name:       readfile
+@ Author:             Ken Hwang
+@ Date:               1/18/2024
+@ Purpose:            Read file of variable length and store at memory location
+@ Input:              r0 - file pointer
+@                     r1 - memory save location
+@ Output:             r0 - number of characters read
+
+@ Constant program data
+        .section  .rodata
+        .align  2
+bufferSize:
+  .word  0x10                                                       @ 16 bytes
+
+@ Program code
+        .equ    temp1,                  -8
+        .equ    temp2,                  -12
+        .equ    temp3,                  -16
+        .equ    temp4,                  -20
+        .equ    temp5,                  -24
+        .equ    temp6,                  -28
+        .equ    locals,                  24
+        .text
+        .align  2
+        .global readfile
+        .syntax unified
+        .type   readfile, %function
+
+readfile:
+  sub               sp, sp, #8
+  str               fp, [sp, #0]
+  str               lr, [sp, #4]
+  add               fp, sp, #4
+  sub               sp, sp, #locals
+  str               r4, [fp, #temp1]
+  str               r5, [fp, #temp2]
+  str               r6, [fp, #temp3]
+  str               r7, [fp, #temp4]
+  str               r8, [fp, #temp5]
+  str               r9, [fp, #temp6]
+
+  mov               r4, r0                                          @ r4 = file pointer
+  mov               r5, r1                                          @ r5 = memory location
+  mov               r6, #0                                          @ r6 = chararcters read
+
+  # allocate buffer
+  ldr                 r7, =bufferSize                              
+  ldr                 r7, [r7, #0]                                  @ r7 = buffer size
+
+  mov                 r0, r7
+  bl                  malloc
+  mov                 r8, r0                                        @ r8 = buffer pointer
+
+  # read from file until null terminator
+  readFromFileLoop:
+
+    # read from file
+    mov               r0, r8                                        @ buffer address
+    mov               r1, r7                                        @ buffer size
+    mov               r2, r4                                        @ file pointer
+    bl                fgets
+
+    # calculate number of characters read in buffer
+    mov               r0, r8                                        @ buffer address
+    bl                strlen
+    mov               r9, r0                                        @ r9 = number of characters read
+    add               r6, r6, r9                                    @ increment total characters 
+
+    # copy buffer to allocated memory block
+    mov               r0, r5                                        @ message address
+    mov               r1, r8                                        @ buffer pointer
+    mov               r2, r9                                        @ number of characters 
+    bl                memcpy
+
+    # advance by number of characters read in buffer
+    add               r5, r5, r9                                    @ increment message pointer
+
+    # clear buffer
+    mov               r0, r8                                        @ buffer address
+    mov               r1, #0                                        @ clear buffer
+    mov               r2, r7                                        @ buffer size
+    bl                memset
+
+    # check if at end of file
+    mov               r0, r4                                        @ file pointer
+    bl                feof                                           
+    cmp               r0, #0                                        @ EOF will return non-zero
+    beq               readFromFileLoop                              @ if zero, continue loop
+
+  # free buffer
+  mov                 r0, r8
+  bl                  free
+
+  # output total characters 
+  mov                 r0, r6                                    
+  
+  ldr                 r9, [fp, #temp6]
+  ldr                 r8, [fp, #temp5]
+  ldr                 r7, [fp, #temp4]
+  ldr                 r6, [fp, #temp3]
+  ldr                 r5, [fp, #temp2]
+  ldr                 r4, [fp, #temp1]
+  add                 sp, sp, #locals
+  ldr                 fp, [sp, #0]
+  ldr                 lr, [sp, #4]
+  add                 sp, sp, #8
+  bx                  lr 
 
   .section  .note.GNU-stack,"",%progbits

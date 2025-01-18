@@ -6,14 +6,14 @@
 @ Constant program data
         .section  .rodata
         .align  2
-# __main_separator:
-#   .asciz ", "
-# __main_newline:
-#   .aciz "\n"
 __main_promptMessage:
   .asciz "Type a message: "
 __main_messageFormat:
-  .asciz  "%49[^\n]"
+  .asciz  "%255[^\n]"
+maxStringCharLength:
+  .word  0x100                                                        
+bitLength:
+  .word  0x10                                                       @ 16-bit length (k)
 __main_outputP:
   .asciz "p: %d\n"
 __main_outputQ:
@@ -32,11 +32,6 @@ writemode:
   .asciz "w"
 readmode:
   .asciz "r"
-bitLength:
-  .word  0x10                                                       @ 16-bit length (k)
-  # .word  0x20                                                       @ 32-bit length (k)
-stringCharLength:
-  .word  50                                                        
 
 @ Program code
         .equ    temp1,                  -8
@@ -70,194 +65,210 @@ main:
   str                 r9, [fp, #temp6]
   str                 r10, [fp, #temp7]
 
-  # get public exponent
-  bl                  cpubexp
-  mov                 r4, r0                                        @ r4 = e 
+  generatePublicKey:
+    # get public exponent
+    bl                  cpubexp
+    mov                 r4, r0                                        @ r4 = e 
  
-  # display public key
-  ldr                 r0, =__main_displayPublicKey
-  mov                 r1, r4
-  bl                  printf
+    # display public key
+    ldr                 r0, =__main_displayPublicKey
+    mov                 r1, r4
+    bl                  printf
  
-  # set seed
-  mov                 r0, #seed                                
-  bl                  srand                                  
+  generatePrimes:
+    # set seed
+    mov                 r0, #seed                                
+    bl                  srand                                  
 
-  # generate p and q
-  ldr                 r0, =bitLength                                
-  ldr                 r5, [r0, #0]                                  @ r5 = modulus bit length (k)            
-  lsr                 r6, r5, #1                                    @ r6 = p and q bit length (k/2)
+    # generate p and q
+    ldr                 r0, =bitLength                                
+    ldr                 r5, [r0, #0]                                  @ r5 = modulus bit length (k)            
+    lsr                 r6, r5, #1                                    @ r6 = p and q bit length (k/2)
 
-  generateP:
-    # generate prime number p
-    mov               r0, r6
-    bl                genprime
-    mov               r7, r0                                        @ r7 = p
+    generateP:
+      # generate prime number p
+      mov               r0, r6
+      bl                genprime
+      mov               r7, r0                                        @ r7 = p
 
-    # validate p is coprime, gcd(e, p-1) == 1
-    mov               r0, r4
-    sub               r1, r7, #1
-    bl                gcd
+      # validate p is coprime, gcd(e, p-1) == 1
+      mov               r0, r4
+      sub               r1, r7, #1
+      bl                gcd
 
-    cmp               r0, #1
-    bne               generateP                                     @ not coprime, try again
+      cmp               r0, #1
+      bne               generateP                                     @ not coprime, try again
 
-    # display P
-    ldr               r0, =__main_outputP
-    mov               r1, r7
-    bl                printf
+      # display P
+      ldr               r0, =__main_outputP
+      mov               r1, r7
+      bl                printf
 
-  generateQ:
-    # generate prime number q
-    sub               r0, r5, r6                                    @ k - k/2         
-    bl                genprime
-    mov               r8, r0                                        @ r8 = q
+    generateQ:
+      # generate prime number q
+      sub               r0, r5, r6                                    @ k - k/2         
+      bl                genprime
+      mov               r8, r0                                        @ r8 = q
 
-    # validate p != q
-    cmp               r7, r8                                                        
-    beq               generateQ                                     @ p == q, try again
+      # validate p != q
+      cmp               r7, r8                                                        
+      beq               generateQ                                     @ p == q, try again
 
-    # validate q is coprime, gcd(e, q-1) == 1
-    mov               r0, r4
-    sub               r1, r8, #1
-    bl                gcd
+      # validate q is coprime, gcd(e, q-1) == 1
+      mov               r0, r4
+      sub               r1, r8, #1
+      bl                gcd
 
-    cmp               r0, #1
-    bne               generateQ                                     @ not coprime, try again
+      cmp               r0, #1
+      bne               generateQ                                     @ not coprime, try again
 
-    # display Q
-    ldr               r0, =__main_outputQ
-    mov               r1, r8
-    bl                printf
+      # display Q
+      ldr               r0, =__main_outputQ
+      mov               r1, r8
+      bl                printf
 
-  # calculate n
-  mul                 r5, r7, r8                                    @ r5 = n = p * q
+  generatePrivateKey:
+    # calculate n
+    mul                 r5, r7, r8                                    @ r5 = n = p * q
 
-  # display modulus
-  ldr                 r0, =__main_displayModulus
-  mov                 r1, r5
-  bl                  printf
+    # display modulus
+    ldr                 r0, =__main_displayModulus
+    mov                 r1, r5
+    bl                  printf
 
-  # calculate private key
-  mov                 r0, r4
-  mov                 r1, r7
-  mov                 r2, r8
-  bl                  cprivexp                                      @ cprivexp(e, p, q)
-  mov                 r6, r0                                        @ r6 = d
+    # calculate private key
+    mov                 r0, r4
+    mov                 r1, r7
+    mov                 r2, r8
+    bl                  cprivexp                                      @ cprivexp(e, p, q)
+    mov                 r6, r0                                        @ r6 = d
 
-  # display private key 
-  ldr                 r0, =__main_displayPrivateKey
-  mov                 r1, r6
-  bl                  printf
+    # display private key 
+    ldr                 r0, =__main_displayPrivateKey
+    mov                 r1, r6
+    bl                  printf
 
-  # allocate memory
-  ldr                 r10, =stringCharLength
-  ldr                 r10, [r10, #0]                                @ r10 = length of string
+  encryptMessage:
+    # allocate memory
+    ldr                 r10, =maxStringCharLength
+    ldr                 r10, [r10, #0]                                @ r10 = length of string
 
-  mov                 r0, r10
-  mov                 r1, #size_char           
-  bl                  calloc
-  mov                 r7, r0                                        @ r7 = string pointer
+    mov                 r0, r10
+    mov                 r1, #size_char           
+    bl                  calloc
+    mov                 r7, r0                                        @ r7 = message pointer
 
-  mov                 r0, r10
-  mov                 r1, #size_t           
-  bl                  calloc
-  mov                 r9, r0                                        @ r9 = encrypted string pointer
+    mov                 r0, r10
+    mov                 r1, #size_t           
+    bl                  calloc
+    mov                 r9, r0                                        @ r9 = encrypted message pointer
 
-  # message prompt     
-  ldr                 r0, =__main_promptMessage
-  bl                  printf
+    # message prompt     
+    ldr                 r0, =__main_promptMessage
+    bl                  printf
 
-  ldr                 r0, =__main_messageFormat
-  mov                 r1, r7                                        @ string address
-  bl                  scanf 
-  bl                  getchar 
+    ldr                 r0, =__main_messageFormat
+    mov                 r1, r7                                        @ message address
+    bl                  scanf 
+    bl                  getchar 
 
-  # encrypt message
-  mov                 r0, r7                                        @ string address 
-  mov                 r1, r9                                        @ encrypted message address
-  mov                 r2, r4                                        @ public key (e)
-  mov                 r3, r5                                        @ modulus
-  bl                  encrypt
+    # calculate character length
+    mov                 r0, r7
+    bl                  strlen
+    mov                 r10, r0                                       @ r10 = character length
 
-  # open file for writing
-  ldr                 r0, =filename
-  ldr                 r1, =writemode
-  bl                  fopen  
-  mov                 r8, r0                                        @ r8 = file pointer
+    # encrypt message
+    mov                 r0, r7                                        @ message address 
+    mov                 r1, r9                                        @ encrypted message address
+    mov                 r2, r4                                        @ public key (e)
+    mov                 r3, r5                                        @ modulus
+    bl                  encrypt
 
-  # write to file
-  mov                 r0, r9                                        @ encrypted message address                
-  mov                 r1, #size_t
-  mov                 r2, r10
-  mov                 r3, r8                                        @ file pointer      
-  bl                  fwrite        
+    # open file for writing
+    ldr                 r0, =filename
+    ldr                 r1, =writemode
+    bl                  fopen  
+    mov                 r8, r0                                        @ r8 = file pointer
 
-  # close file
-  mov                 r0, r8
-  bl                  fclose 
+    # # write to file
+    # mov                 r0, r8                                        @ file pointer
+    # mov                 r1, r9                                        @ encrypted message address
+    # bl                  fprintf
+
+    # write to file (fixed sized)
+    mov                 r0, r9                                        @ encrypted message address                
+    mov                 r1, #size_t
+    mov                 r2, r10                                       @ number of characters
+    mov                 r3, r8                                        @ file pointer      
+    bl                  fwrite        
+
+    encryptMessageCleanUp:
+      # close file
+      mov                 r0, r8
+      bl                  fclose 
+
+      # free memory
+      mov                 r0, r7
+      bl                  free
+
+      mov                 r0, r9
+      bl                  free
   
-  # TEMP
-  # free memory
-  mov                 r0, r7
-  bl                  free
+  readEncryptedMessage:
+    # allocate memory for encrypted message
+    ldr                 r10, =maxStringCharLength
+    ldr                 r10, [r10, #0]                                @ r10 = length of string
 
-  mov                 r0, r9
-  bl                  free
+    mov                 r0, r10
+    mov                 r1, #size_t           
+    bl                  calloc
+    mov                 r9, r0                                        @ r9 = encrypted string pointer
 
-  mov                 r0, r10
-  mov                 r1, #size_t           
-  bl                  calloc
-  mov                 r9, r0                                        @ r9 = encrypted string pointer
-  # TEMP
+    # open file for reading
+    ldr                 r0, =filename
+    ldr                 r1, =readmode
+    bl                  fopen  
+    mov                 r8, r0                                        @ r8 = file pointer
 
-  # open file for reading
-  ldr                 r0, =filename
-  ldr                 r1, =readmode
-  bl                  fopen  
-  mov                 r8, r0                                        @ r8 = file pointer
+    # read from file
+    mov                 r0, r8                                        @ file pointer
+    mov                 r1, r9                                        @ encrypted message address
+    bl                  readfile                                      @ returns number of characters read 
 
-  # read from file
-  mov                 r0, r9                                        @ encrypted message address
-  mov                 r1, #size_t
-  mov                 r2, r10
-  mov                 r3, r8                                        @ file pointer
-  bl                  fread
+    # calculate size of encrypted message 
+    mov                 r1, #size_t                                   @ size of encrypted char
+    bl                  divide                                        @ divide number of characters by size of encrypted char
+    mov                 r1, r0                                        @ number of characters
 
-  # close file
-  mov                 r0, r8
-  bl                  fclose 
+    # allocate memory for decrypted message
+    mov                 r0, r10
+    bl                  calloc
+    mov                 r7, r0                                        @ r7 = display message string pointer
 
-  # TEMP
-  mov                 r0, r10
-  mov                 r1, #size_char           
-  bl                  calloc
-  mov                 r7, r0                                        @ r7 = display messsage string pointer
-  # TEMP
+  decryptMessage:
+    # decrypt message
+    mov                 r0, r7                                        @ display string address 
+    mov                 r1, r9                                        @ encrypted message address
+    mov                 r2, r6                                        @ private key (d)
+    mov                 r3, r5                                        @ modulus
+    bl                  decrypt
 
-  # decrypt message
-  mov                 r0, r7                                        @ string address 
-  mov                 r1, r9                                        @ encrypted message address
-  mov                 r2, r6                                        @ private key (d)
-  mov                 r3, r5                                        @ modulus
-  bl                  decrypt
-
-  # display decrypted message
-  ldr                 r0, =__main_displayDecryptedMessage   
-  mov                 r1, r7                                        @ string address
-  bl                  printf
-
-  b                   cleanUp
+    # display decrypted message
+    ldr                 r0, =__main_displayDecryptedMessage   
+    mov                 r1, r7                                        @ string address
+    bl                  printf
  
-  cleanUp:
-    # free memory
-    mov               r0, r7
-    bl                free
+    decryptMessageCleanUp:
+      # close file
+      mov                 r0, r8
+      bl                  fclose 
 
-    mov               r0, r9
-    bl                free
+      # free memory
+      mov                 r0, r7
+      bl                  free
 
-    b                 exit
+      mov                 r0, r9
+      bl                  free
   
   exit:
     ldr               r10, [fp, #temp7]

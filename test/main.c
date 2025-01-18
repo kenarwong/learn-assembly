@@ -38,5 +38,27 @@ int main() {
 
   printf("The content read from the file is: %s\n", input2);
 
+  fclose(file);
+
+  file = fopen("output.txt", "r");
+  if (file == NULL) {
+    perror("Error opening file");
+    return 1;
+  }
+
+  char buffer[256];
+  printf("Reading the file using fgets until EOF:\n");
+  while (fgets(buffer, sizeof(buffer), file) != NULL) {
+    printf("%s", buffer);
+  }
+
+  if (ferror(file)) {
+    perror("Error reading file with fgets");
+    fclose(file);
+    return 1;
+  }
+
+  fclose(file);
+
   return 0;
 }
