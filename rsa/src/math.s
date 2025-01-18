@@ -30,12 +30,12 @@ gcd:
 
   loopGCD:
     cmp             r1, #0
-    beq             exitGCD                 @ if b == 0, then exit
+    beq             exitGCD                                     @ if b == 0, then exit
 
     # modulo and swap
-    mov             r4, r1                  @ temp = b
-    bl              modulo                  @ r1 = a % b        
-    mov             r0, r4                  @ a = temp    
+    mov             r4, r1                                      @ temp = b
+    bl              modulo                                      @ r1 = a % b        
+    mov             r0, r4                                      @ a = temp    
 
     b               loopGCD
   
@@ -69,22 +69,22 @@ pow:
   add               fp, sp, #4
 
   # initialize
-  mov		            r2, #1                    @ result
+  mov               r2, #1                                     @ result
    
-  loopExponent:	
-    cmp             r1, #0		               
-    ble             exitLoopExponent          @ if e <= 0, then exit 
+  loopExponent:
+    cmp             r1, #0
+    ble             exitLoopExponent                           @ if e <= 0, then exit 
 
-    tst             r1, #1                    @ if e is odd (bitwise AND), z = 0 (zero flag cleared)
-    mulne           r2, r2, r0                @ result *= b (ne: z = 0)
+    tst             r1, #1                                     @ if e is odd (bitwise AND), z = 0 (zero flag cleared)
+    mulne           r2, r2, r0                                 @ result *= b (ne: z = 0)
 
-    mul             r0, r0, r0                @ b = b^2 
-    lsr             r1, r1, #1                @ e >> 1
-    b               loopExponent              @ if n != 0, repeat 
+    mul             r0, r0, r0                                 @ b = b^2 
+    lsr             r1, r1, #1                                 @ e >> 1
+    b               loopExponent                               @ if n != 0, repeat 
   
   exitLoopExponent:
 
-  mov             r0, r2                      @ output result
+  mov             r0, r2                                       @ output result
   
   ldr             fp, [sp, #0]
   ldr             lr, [sp, #4]
@@ -157,36 +157,36 @@ divide:
 #   # 2's complement of divisor
 #   mvn               r1, r1              
 #   add               r1, r1, #1
-#   lsl               r1, r1, #bitLength            @ shift divisor
+#   lsl               r1, r1, #bitLength                      @ shift divisor
 # 
-#   mov               r2, #bitLength                @ n bits
-#   mov               r3, r0                        @ initialize AQ
+#   mov               r2, #bitLength                          @ n bits
+#   mov               r3, r0                                  @ initialize AQ
 # 
-#   mov               r4, 0xffff                    @ A mask
-#   mov               r5, 0xffff0000                @ Q mask
+#   mov               r4, 0xffff                              @ A mask
+#   mov               r5, 0xffff0000                          @ Q mask
 # 
 #   divideLoop:
 #     cmp             r2, #0
-#     beq             exitloop                      @ if n == 0, exit
+#     beq             exitloop                                @ if n == 0, exit
 # 
-#     lsl             r3, r3, #1                    @ shift AQ
-#     add             r6, r3, r1                    @ subtract divisor, r6 is remainder
-#                                                   @ allow overflow so we can detect
+#     lsl             r3, r3, #1                              @ shift AQ
+#     add             r6, r3, r1                              @ subtract divisor, r6 is remainder
+#                                                             @ allow overflow so we can detect
 # 
 #     # overflow detection (same sign operands)
-#     eor             r7, r6, r1                    @ determine bit changes
-#     tst             r7, #0x80000000               @ look at last bit for change
+#     eor             r7, r6, r1                              @ determine bit changes
+#     tst             r7, #0x80000000                         @ look at last bit for change
 # 
-#     subs            r2, r2, #1                    @ n--
+#     subs            r2, r2, #1                              @ n--
 # 
-#     bne             divideLoop                    @ no overflow if no change in last bit
+#     bne             divideLoop                              @ no overflow if no change in last bit
 # 
 #     @ if overflow
-#     orr             r3, r3, #1                    @ if overflow detected, set Q0 = 1
+#     orr             r3, r3, #1                              @ if overflow detected, set Q0 = 1
 # 
 #     @ add remainder to A
-#     and             r8, r3, r4                    @ mask A from AQ (keep Q)
-#     orr             r3, r6, r8                    @ add remainder to A
+#     and             r8, r3, r4                              @ mask A from AQ (keep Q)
+#     orr             r3, r6, r8                              @ add remainder to A
 # 
 #     b               divideLoop
 # 

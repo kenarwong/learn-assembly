@@ -19,7 +19,7 @@ __cpubexp_input:
 __cpubexp_error:
   .asciz "You entered invalid input.\n"
 fermatNumbers:
-  .word   0x3, 0x5, 0x11, 0x101, 0x10001                           @ First five Fermat numbers (e)
+  .word   0b1, 0b101, 0x11, 0x101, 0x10001                           @ First five Fermat numbers (e)
 
 @ Program code
         .equ    userValueE,             -8
@@ -108,22 +108,22 @@ cprivexp:
   str               r5, [fp, #temp2]
   str               r6, [fp, #temp3]
 
-  mov               r4, r0                                        @ r4 = e
-  mov               r5, r1                                        @ r5 = p
-  mov               r6, r2                                        @ r6 = q
+  mov               r4, r0                                          @ r4 = e
+  mov               r5, r1                                          @ r5 = p
+  mov               r6, r2                                          @ r6 = q
 
   # calculate euler's totient
   # phi(n) = (p-1)(q-1)
   sub               r0, r5, #1
   sub               r1, r6, #1
-  mul               r2, r0, r1                                    @ phi(n) = (p-1) * (q-1)
+  mul               r2, r0, r1                                      @ phi(n) = (p-1) * (q-1)
 
   # choose d such that d is coprime to phi(n)
   # e*d = 1 (mod phi(n))
   # calculate multiplicative inverse of e modulo phi(n)
   mov               r0, r4
   mov               r1, r2
-  bl                modinv                                        @ r0 = modinv(e, phi(n))
+  bl                modinv                                          @ r0 = modinv(e, phi(n))
   
   ldr               r6, [fp, #temp3]
   ldr               r5, [fp, #temp2]
@@ -193,26 +193,26 @@ encrypt:
     beq             exitEncrypt                                     @ reached null terminator, exit
 
     # initialize
-    mov             r5, #1                    @ c = 1
-    mov             r10, r6                   @ r10 = e
+    mov             r5, #1                                          @ c = 1
+    mov             r10, r6                                         @ r10 = e
 
     # c = (m^e) mod n
     # only perform one exponentiation operation at a time followed by modulus to avoid overflow
     computeModExpLoop:
-      cmp             r10, #0                   @ check if e == 0
-      beq             storeEncryptedChar        @ if e == 0, store result
+      cmp             r10, #0                                       @ check if e == 0
+      beq             storeEncryptedChar                            @ if e == 0, store result
 
-      umull           r5, r0, r5, r4            @ c = c * m
-                                                @ maximum byte size of intermediate multiplication is size_t + 1
+      umull           r5, r0, r5, r4                                @ c = c * m
+                                                                    @ maximum byte size of intermediate multiplication is size_t + 1
       cmp             r0, #0          
-      bne             encryptMulOverflow        @ upper byte != 0, overflow detected (1) 
+      bne             encryptMulOverflow                            @ upper byte != 0, overflow detected (1) 
 
       mov             r0, r5                    
       mov             r1, r7                    
-      bl              modulo                    @ r1 = c % n
-      mov             r5, r1                    @ c = r1
+      bl              modulo                                        @ r1 = c % n
+      mov             r5, r1                                        @ c = r1
 
-      sub             r10, r10, #1              @ e--
+      sub             r10, r10, #1                                  @ e--
       b               computeModExpLoop
 
     storeEncryptedChar:
@@ -264,8 +264,8 @@ __cpubexp_decryptMulOverflow:
         .equ    temp6,                  -28
         .equ    temp7,                  -32
         .equ    locals,                  28
-        .equ    size_char,              1                           @ size of char in bytes
-        .equ    size_t,                 2                           @ size of modulo in bytes
+        .equ    size_char,              1                             @ size of char in bytes
+        .equ    size_t,                 2                             @ size of modulo in bytes
         .text
         .align  2
         .global decrypt
@@ -286,10 +286,10 @@ decrypt:
   str               r9, [fp, #temp6]
   str               r10, [fp, #temp7]
 
-  mov               r6, r2                                          @ r6 = d
-  mov               r7, r3                                          @ r7 = n
-  mov               r8, r0                                          @ r8 = string pointer
-  mov               r9, r1                                          @ r9 = encrypted string pointer 
+  mov               r6, r2                                            @ r6 = d
+  mov               r7, r3                                            @ r7 = n
+  mov               r8, r0                                            @ r8 = string pointer
+  mov               r9, r1                                            @ r9 = encrypted string pointer 
 
   loopDecrypt:
     # loop load encrypted char of size_t into register
@@ -316,33 +316,33 @@ decrypt:
 
     # check if end of encrypted string
     cmp             r4, #0
-    beq             exitDecrypt                                     @ reached null terminator, exit
+    beq             exitDecrypt                                       @ reached null terminator, exit
 
     # initialize
-    mov             r5, #1                    @ m = 1
-    mov             r10, r6                   @ r10 = d
+    mov             r5, #1                                            @ m = 1
+    mov             r10, r6                                           @ r10 = d
 
     # m = (c^d) mod n
     # only perform one exponentiation operation at a time followed by modulus to avoid overflow
     computeDecryptModExpLoop:
-      cmp             r10, #0                   @ check if d == 0
-      beq             storeDecryptedChar        @ if d == 0, store result
+      cmp             r10, #0                                         @ check if d == 0
+      beq             storeDecryptedChar                              @ if d == 0, store result
 
-      umull           r5, r0, r5, r4            @ m = m * c
-                                                @ maximum byte size of intermediate multiplication is 2*size_t
+      umull           r5, r0, r5, r4                                  @ m = m * c
+                                                                      @ maximum byte size of intermediate multiplication is 2*size_t
       cmp             r0, #0          
-      bne             decryptMulOverflow        @ upper byte != 0, overflow detected (1) 
+      bne             decryptMulOverflow                              @ upper byte != 0, overflow detected (1) 
 
       mov             r0, r5                    
       mov             r1, r7                    
-      bl              modulo                    @ r1 = m % n
-      mov             r5, r1                    @ m = r1
+      bl              modulo                                          @ r1 = m % n
+      mov             r5, r1                                          @ m = r1
 
-      sub             r10, r10, #1              @ d--
+      sub             r10, r10, #1                                    @ d--
       b               computeDecryptModExpLoop
 
     storeDecryptedChar:
-      strb          r5, [r8], #size_char        @ store decrypted char and increment pointer
+      strb          r5, [r8], #size_char                              @ store decrypted char and increment pointer
 
     # loop back to load next encrypted char
     b               loopDecrypt
@@ -394,13 +394,13 @@ genprime:
   str               r5, [fp, #temp2]
   str               r6, [fp, #temp3]
 
-  mov               r4, r0                        @ r4 = bit length (n)
-  mov               r5, #3                        @ r5 = min (3)
+  mov               r4, r0                                          @ r4 = bit length (n)
+  mov               r5, #3                                          @ r5 = min (3)
 
   genPrimeLoop:
     # generate random number
     # min + rand() % (max - min)
-    bl                rand                        @ r0 = random number          
+    bl                rand                                          @ r0 = random number          
 
     # (2^n - 1) - min
     mov               r1, #1
@@ -408,25 +408,25 @@ genprime:
     sub               r1, r1, #1                
     sub               r1, r1, r5                
 
-    bl                modulo                      @ r1 = r0 % r1
-    add               r6, r1, r5                  @ r6 = r1 + min
+    bl                modulo                                        @ r1 = r0 % r1
+    add               r6, r1, r5                                    @ r6 = r1 + min
 
     # set msb and lsb 
     mov               r0, #1
-    sub               r1, r4, #1                  @ r1 = n-1
-    lsl               r0, r0, r1                  @ r0 = 2(n-1) 
-    orr               r6, r6, r0                  @ set bit n-1
-    orr               r6, r6, #1                  @ set bit 0
+    sub               r1, r4, #1                                    @ r1 = n-1
+    lsl               r0, r0, r1                                    @ r0 = 2(n-1) 
+    orr               r6, r6, r0                                    @ set bit n-1
+    orr               r6, r6, #1                                    @ set bit 0
 
     # check if prime
     mov               r0, r6
-    bl                checkprime                  @ prime == 1
+    bl                checkprime                                    @ prime == 1
 
-    cmp               r0, #1                      @ r0 == 1, prime
-    bne               genPrimeLoop                @ r0 != 1, not prime, try again 
+    cmp               r0, #1                                        @ r0 == 1, prime
+    bne               genPrimeLoop                                  @ r0 != 1, not prime, try again 
 
   exitGenPrimeLoop:
-    mov               r0, r6                      @ output prime number
+    mov               r0, r6                                        @ output prime number
   
     ldr               r6, [fp, #temp3]
     ldr               r5, [fp, #temp2]

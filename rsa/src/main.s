@@ -13,7 +13,7 @@ __main_messageFormat:
 maxStringCharLength:
   .word  0x100                                                        
 bitLength:
-  .word  0x10                                                       @ 16-bit length (k)
+  .word  0x10                                                         @ 16-bit length (k)
 __main_outputP:
   .asciz "p: %d\n"
 __main_outputQ:
@@ -43,8 +43,8 @@ readmode:
         .equ    temp7,                  -32
         .equ    locals,                  28
         .equ    seed,                   0x00
-        .equ    size_char,              1                           @ size of char in bytes
-        .equ    size_t,                 2                           @ size of modulo in bytes
+        .equ    size_char,              1                             @ size of char in bytes
+        .equ    size_t,                 2                             @ size of modulo in bytes
         .text
         .align  2
         .global main
