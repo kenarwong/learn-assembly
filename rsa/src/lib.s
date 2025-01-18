@@ -19,7 +19,7 @@ __cpubexp_input:
 __cpubexp_error:
   .asciz "You entered invalid input.\n"
 fermatNumbers:
-  .word   0b1, 0b101, 0x11, 0x101, 0x10001                           @ First five Fermat numbers (e)
+  .word   0b11, 0b101, 0x11, 0x101, 0x10001                          @ First five Fermat numbers (e)
 
 @ Program code
         .equ    userValueE,             -8
