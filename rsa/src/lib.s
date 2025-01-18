@@ -556,8 +556,8 @@ readfile:
         .equ    temp1,                  -8
         .equ    temp2,                  -12
         .equ    locals,                  8
-        .equ    SEEK_SET,               0                           @ set file pointer to beginning
-        .equ    SEEK_END,               2                           @ set file pointer to end
+        .equ    SEEK_SET,                0                          @ set file pointer to beginning
+        .equ    SEEK_END,                2                          @ set file pointer to end
         .text
         .align  2
         .global fsize

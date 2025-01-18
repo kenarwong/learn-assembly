@@ -50,7 +50,7 @@ gcd:
 @ Program name:       pow
 @ Author:             Ken Hwang
 @ Date:               1/17/2024
-@ Purpose:            Performs exponentiation by squaring
+@ Purpose:            Calculate exponent using exponentiation by squaring
 @ Input:              r0 - base (b)
 @                     r1 - exponent (e)
 @ Output:             r0 - result (b^e)
@@ -69,22 +69,22 @@ pow:
   add               fp, sp, #4
 
   # initialize
-  mov		            r2, #1		              @ result
+  mov		            r2, #1                    @ result
    
   loopExponent:	
     cmp             r1, #0		               
-    ble             exitLoopExponent		    @ if e <= 0, then exit 
+    ble             exitLoopExponent          @ if e <= 0, then exit 
 
-    tst             r1, #1                  @ if e is odd (bitwise AND), z = 0 (zero flag cleared)
-    mulne           r2, r2, r0              @ result *= b (ne: z = 0)
+    tst             r1, #1                    @ if e is odd (bitwise AND), z = 0 (zero flag cleared)
+    mulne           r2, r2, r0                @ result *= b (ne: z = 0)
 
-    mul             r0, r0, r0              @ b = b^2 
-    lsr             r1, r1, #1              @ e >> 1
-    b               loopExponent            @ if n != 0, repeat 
+    mul             r0, r0, r0                @ b = b^2 
+    lsr             r1, r1, #1                @ e >> 1
+    b               loopExponent              @ if n != 0, repeat 
   
   exitLoopExponent:
 
-  mov             r0, r2                    @ r0 = result
+  mov             r0, r2                      @ output result
   
   ldr             fp, [sp, #0]
   ldr             lr, [sp, #4]
