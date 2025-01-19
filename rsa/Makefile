@@ -22,7 +22,7 @@ run: clean $(BIN)/$(EXECUTABLE)
 
 disassemble: all
 		$(ASM)-objdump $(BIN)/$(EXECUTABLE).o -d
- 
+
 debug:
 		gdb-multiarch -q \
 		-ex 'set architecture $(DEBUG_ARCH)' \
@@ -32,4 +32,5 @@ debug:
 		-ex continue \
 
 clean:
-		-rm ./$(BIN)/* encrypted.txt
+		-rm ./$(BIN)/*
+		-rm encrypted.txt
