@@ -146,7 +146,7 @@ cprivexp:
 @ Constant program data
         .section  .rodata
         .align  2
-__cpubexp_encryptMulOverflow:
+__encrypt_MulOverflow:
   .asciz "Error (encrypt): Multiplication overflow detected.\n"
 
 @ Program code
@@ -222,7 +222,7 @@ encrypt:
     b               loopEncrypt
 
     encryptMulOverflow:
-      ldr             r0, =__cpubexp_encryptMulOverflow
+      ldr             r0, =__encrypt_MulOverflow
       bl              printf
       b               exitEncrypt
 
@@ -252,7 +252,7 @@ encrypt:
 @ Constant program data
         .section  .rodata
         .align  2
-__cpubexp_decryptMulOverflow:
+__decrypt_MulOverflow:
   .asciz "Error (decrypt): Multiplication overflow detected.\n"
 
 @ Program code
@@ -348,7 +348,7 @@ decrypt:
     b               loopDecrypt
 
   decryptMulOverflow:
-    ldr             r0, =__cpubexp_decryptMulOverflow
+    ldr             r0, =__decrypt_MulOverflow
     bl              printf
     b               exitDecrypt
 
